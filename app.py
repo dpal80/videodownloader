@@ -14,6 +14,8 @@ from downloader import FORMATS, RESOLUTIONS, JobManager, get_info, is_supported_
 from registro import DICHIARAZIONE, DICHIARAZIONE_VERSIONE, DownloadLog, computer_user
 
 ONLINE = os.environ.get("GRABBY_MODE", "local").lower() == "online"
+# Lingue della pagina: devono coincidere con LANGUAGES in static/i18n.js.
+LANGUAGES = ("it", "en", "es", "fr", "de", "pt")
 # Online i file restano sul server solo finché l'utente li scarica.
 FILE_MAX_AGE = 3600
 DOWNLOADS_PER_HOUR = int(os.environ.get("GRABBY_LIMITE_ORARIO", "10"))
@@ -63,14 +65,33 @@ def _json_body() -> dict:
     return request.get_json(silent=True) or {}
 
 
+def _error(code: str, message: str, status: int, detail: str = ""):
+    """Errore per la pagina: `code` permette di tradurre il messaggio nel browser."""
+    data = {"error": message, "code": code}
+    if detail:
+        data["detail"] = detail
+    return jsonify(data), status
+
+
 @app.get("/")
 def index():
     return send_from_directory(app.static_folder, "index.html")
 
 
+def _page_language() -> str:
+    """Lingua chiesta con ?lang=xx, altrimenti quella del browser; italiano se non c'è."""
+    lang = request.args.get("lang", "")
+    if lang in LANGUAGES:
+        return lang
+    return request.accept_languages.best_match(LANGUAGES, default="it")
+
+
 @app.get("/note-legali")
 def legal_notes():
-    return send_from_directory(app.static_folder, "note-legali.html")
+    # Le traduzioni sono di cortesia: fa fede il testo italiano.
+    lang = _page_language()
+    name = "note-legali.html" if lang == "it" else f"note-legali.{lang}.html"
+    return send_from_directory(app.static_folder, name)
 
 
 @app.get("/privacy")
@@ -95,13 +116,13 @@ def options():
 def info():
     url = (_json_body().get("url") or "").strip()
     if not is_supported_url(url):
-        return jsonify(error="Inserisci un link valido di YouTube o Facebook."), 400
+        return _error("invalid_url", "Inserisci un link valido di YouTube o Facebook.", 400)
     if ONLINE and not info_limiter.allow(request.remote_addr):
-        return jsonify(error="Troppe richieste: riprova tra un po'."), 429
+        return _error("too_many", "Troppe richieste: riprova tra un po'.", 429)
     try:
         return jsonify(get_info(url))
     except Exception as exc:  # noqa: BLE001
-        return jsonify(error=f"Impossibile leggere il video: {exc}"), 400
+        return _error("info_failed", f"Impossibile leggere il video: {exc}", 400, detail=str(exc))
 
 
 @app.post("/api/download")
@@ -113,29 +134,36 @@ def download():
     user_name = " ".join(str(body.get("name") or "").split())[:80]
     ip = request.remote_addr
     if not is_supported_url(url):
-        return jsonify(error="Inserisci un link valido di YouTube o Facebook."), 400
+        return _error("invalid_url", "Inserisci un link valido di YouTube o Facebook.", 400)
     if not user_name:
-        return jsonify(error="Scrivi il tuo nome prima di scaricare."), 400
+        return _error("name_required", "Scrivi il tuo nome prima di scaricare.", 400)
     if body.get("accepted") is not True:
-        return jsonify(error="Per scaricare devi accettare l'avviso di responsabilità."), 400
+        return _error("not_accepted", "Per scaricare devi accettare l'avviso di responsabilità.", 400)
     if ONLINE:
         jobs.sweep(FILE_MAX_AGE, delete_files=True)
         if jobs.active_count(ip) >= MAX_ACTIVE_PER_IP:
-            return jsonify(error="Hai già dei download in corso: aspetta che finiscano."), 429
+            return _error("busy", "Hai già dei download in corso: aspetta che finiscano.", 429)
         if not download_limiter.allow(ip):
-            return jsonify(error="Hai raggiunto il limite di download per quest'ora."), 429
+            return _error("rate_limited", "Hai raggiunto il limite di download per quest'ora.", 429)
     try:
         job = jobs.start(url, fmt, resolution, requested_by={
             "nome": user_name,
             "utente_computer": "" if ONLINE else computer_user(),
             "ip": ip,
             "browser": request.headers.get("User-Agent", "")[:300],
-            "lingua": request.headers.get("Accept-Language", "")[:100],
+            "lingua": _log_language(body.get("lang"), request.headers.get("Accept-Language", "")[:100]),
             "dichiarazione": f"accettata {DICHIARAZIONE_VERSIONE}",
         })
     except ValueError as exc:
-        return jsonify(error=str(exc)), 400
+        return _error("invalid_option", str(exc), 400)
     return jsonify(_public(job.to_dict())), 202
+
+
+def _log_language(page_lang, browser_lang: str) -> str:
+    """Nel registro: lingua scelta nella pagina e, tra parentesi, quella del browser."""
+    if page_lang in LANGUAGES and page_lang != browser_lang:
+        return f"{page_lang} (browser: {browser_lang})" if browser_lang else page_lang
+    return browser_lang
 
 
 def _public(data: dict) -> dict:
@@ -149,7 +177,7 @@ def _public(data: dict) -> dict:
 def progress(job_id):
     job = jobs.get(job_id)
     if job is None:
-        return jsonify(error="Download non trovato."), 404
+        return _error("not_found", "Download non trovato.", 404)
     return jsonify(_public(job.to_dict()))
 
 

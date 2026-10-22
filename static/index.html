@@ -6,6 +6,7 @@
   <title>Grabby Video Downloader</title>
   <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
   <link rel="apple-touch-icon" href="/static/apple-touch-icon.png">
+  <script src="/static/i18n.js"></script>
   <style>
     :root {
       /* Colori del marchio Grabby: antracite, blu e verde */
@@ -50,9 +51,10 @@
     .bg-layer.thumb { filter: blur(30px) saturate(1.3); }
     .bg-shade { position: absolute; inset: 0; background: linear-gradient(rgba(10, 15, 20, .25), rgba(10, 15, 20, .55)); }
     @media (prefers-reduced-motion: reduce) { .bg-layer { transition: none; transform: none; } .bg-layer.show { transform: none; } }
-    main > .brand, main > .sub, main > #dir, main > footer { color: #ffffff; text-shadow: 0 1px 8px rgba(0, 0, 0, .45); }
-    main > .brand .kind, main > .sub, main > #dir, main > footer { color: rgba(255, 255, 255, .82); }
+    .top > .brand, main > .sub, main > #dir, main > footer { color: #ffffff; text-shadow: 0 1px 8px rgba(0, 0, 0, .45); }
+    .top > .brand .kind, main > .sub, main > #dir, main > footer { color: rgba(255, 255, 255, .82); }
     footer a { color: inherit; }
+    .card a, dialog a { color: var(--accent); }
     .legal summary { cursor: pointer; font-weight: 600; }
     .legal p { margin: 10px 0 0; font-size: .9rem; color: var(--muted); }
     .notice { margin: 10px 0 0; font-size: .82rem; color: var(--muted); text-align: center; }
@@ -102,6 +104,30 @@
     .muted { color: var(--muted); font-size: .9rem; }
     .actions { display: flex; gap: 8px; margin-top: 12px; }
     @media (max-width: 480px) { .row, .url-row { flex-direction: column; } }
+    /* Scelta della lingua in alto a destra */
+    .top { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+    .lang { position: relative; flex-shrink: 0; }
+    .top .brand { min-width: 0; }
+    @media (max-width: 480px) { .top .brand { font-size: 1.2rem; gap: 8px; } .top .brand img { width: 32px; height: 32px; } }
+    .lang-btn {
+      display: flex; align-items: center; gap: 8px; padding: 6px 10px; border-radius: 8px;
+      background: rgba(255, 255, 255, .14); color: #ffffff; border: 1px solid rgba(255, 255, 255, .3);
+      -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); font-weight: 600;
+    }
+    .lang-btn::after { content: "▾"; font-size: .8em; opacity: .8; }
+    .flag { width: 22px; height: 15px; border-radius: 2px; object-fit: cover; box-shadow: 0 0 0 1px rgba(0, 0, 0, .15); }
+    .lang-menu {
+      position: absolute; right: 0; top: calc(100% + 6px); z-index: 10; min-width: 170px;
+      margin: 0; padding: 6px; list-style: none; border-radius: 10px;
+      background: var(--card); border: 1px solid var(--border); box-shadow: 0 12px 30px rgba(0, 0, 0, .35);
+    }
+    .lang-menu[hidden] { display: none; }
+    .lang-menu li {
+      display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 6px;
+      cursor: pointer; color: var(--text);
+    }
+    .lang-menu li:hover, .lang-menu li:focus { background: var(--bg); outline: none; }
+    .lang-menu li[aria-selected="true"] { font-weight: 700; }
   </style>
 </head>
 <body>
@@ -111,14 +137,22 @@
   <div class="bg-shade"></div>
 </div>
 <main>
-  <h1 class="brand"><img src="/static/logo.svg" alt="" width="40" height="40"> <span class="name">Grabby</span> <span class="kind">Video Downloader</span></h1>
-  <p class="sub"><strong>Acchiappa i tuoi video con un clic.</strong> Incolla un link di YouTube o Facebook, scegli formato e risoluzione e scarica.</p>
+  <div class="top">
+    <h1 class="brand"><img src="/static/logo.svg" alt="" width="40" height="40"> <span class="name">Grabby</span> <span class="kind">Video Downloader</span></h1>
+    <div class="lang">
+      <button type="button" class="lang-btn" id="lang-btn" aria-haspopup="listbox" aria-expanded="false">
+        <img class="flag" id="lang-flag" alt=""> <span id="lang-code"></span>
+      </button>
+      <ul class="lang-menu" id="lang-menu" role="listbox" tabindex="-1" hidden></ul>
+    </div>
+  </div>
+  <p class="sub" data-i18n-html="tagline"><strong>Acchiappa i tuoi video con un clic.</strong> Incolla un link di YouTube o Facebook, scegli formato e risoluzione e scarica.</p>
 
   <div class="card">
-    <label for="url">Link del video</label>
+    <label for="url" data-i18n="url.label">Link del video</label>
     <div class="url-row">
       <input id="url" type="url" placeholder="https://www.youtube.com/watch?v=..." autocomplete="off">
-      <button id="check" class="secondary">Analizza</button>
+      <button id="check" class="secondary" data-i18n="check">Analizza</button>
     </div>
 
     <div class="preview" id="preview">
@@ -131,61 +165,114 @@
 
     <div class="row">
       <div>
-        <label for="format">Formato</label>
+        <label for="format" data-i18n="format.label">Formato</label>
         <select id="format"></select>
       </div>
       <div>
-        <label for="resolution">Risoluzione</label>
+        <label for="resolution" data-i18n="resolution.label">Risoluzione</label>
         <select id="resolution"></select>
       </div>
     </div>
 
-    <button id="download" class="primary">Scarica</button>
-    <p class="notice">Scarica solo video che hai il diritto di salvare. <a href="/note-legali">Note legali</a></p>
+    <button id="download" class="primary" data-i18n="download">Scarica</button>
+    <p class="notice" data-i18n-html="notice">Scarica solo video che hai il diritto di salvare. <a href="/note-legali">Note legali</a></p>
     <div class="msg" id="msg"></div>
   </div>
 
   <div class="card" id="progress-card">
-    <div id="status">In coda…</div>
+    <div id="status"></div>
     <div class="bar"><div id="bar"></div></div>
     <div class="muted" id="details"></div>
-    <div class="actions"><button id="open" class="secondary" style="display:none">Apri cartella</button></div>
+    <div class="actions"><button id="open" class="secondary" style="display:none" data-i18n="open">Apri cartella</button></div>
   </div>
 
   <p class="muted" id="dir"></p>
   <details class="card legal">
-    <summary>Note legali</summary>
-    <p>Grabby è uno strumento per uso personale e privato. Usalo solo per scaricare video di cui possiedi i diritti, video con licenza libera (es. Creative Commons, pubblico dominio) o video per cui hai ottenuto il permesso dell'autore.</p>
-    <p>Scaricare contenuti da YouTube o Facebook può violare i loro Termini di servizio. Non usare Grabby per scaricare, ridistribuire o pubblicare opere protette da diritto d'autore senza autorizzazione. Grabby non aggira sistemi DRM e non è affiliato a YouTube, Google, Facebook o Meta.</p>
-    <p>L'utente è l'unico responsabile dell'uso che fa del software. Queste note non sono consulenza legale.</p>
-    <p><a href="/note-legali">Leggi l'analisi completa: Grabby e il diritto d'autore</a></p>
+    <summary data-i18n="legal.title">Note legali</summary>
+    <p data-i18n="legal.p1">Grabby è uno strumento per uso personale e privato. Usalo solo per scaricare video di cui possiedi i diritti, video con licenza libera (es. Creative Commons, pubblico dominio) o video per cui hai ottenuto il permesso dell'autore.</p>
+    <p data-i18n="legal.p2">Scaricare contenuti da YouTube o Facebook può violare i loro Termini di servizio. Non usare Grabby per scaricare, ridistribuire o pubblicare opere protette da diritto d'autore senza autorizzazione. Grabby non aggira sistemi DRM e non è affiliato a YouTube, Google, Facebook o Meta.</p>
+    <p data-i18n="legal.p3">L'utente è l'unico responsabile dell'uso che fa del software. Queste note non sono consulenza legale.</p>
+    <p><a href="/note-legali" data-i18n-href="legal" data-i18n="legal.more">Leggi l'analisi completa: Grabby e il diritto d'autore</a></p>
   </details>
 
-  <footer>Grabby · incolla, scegli, scarica. · <a href="/note-legali">Note legali</a><span id="privacy-link" hidden> · <a href="/privacy">Privacy</a></span></footer>
+  <footer><span data-i18n="footer">Grabby · incolla, scegli, scarica.</span> · <a href="/note-legali" data-i18n-href="legal" data-i18n="footer.legal">Note legali</a><span id="privacy-link" hidden> · <a href="/privacy" data-i18n-href="privacy">Privacy</a></span></footer>
 </main>
 
 <dialog id="confirm" aria-labelledby="confirm-title">
   <form method="dialog" id="confirm-form">
-    <h2 id="confirm-title">Prima di scaricare</h2>
-    <p>L'utilizzo dei video e degli audio scaricati è permesso <strong>solo nei casi consentiti</strong>, indicati in verde nelle <a href="/note-legali#casi-consentiti" target="_blank" rel="noopener">note legali</a>:</p>
+    <h2 id="confirm-title" data-i18n="confirm.title">Prima di scaricare</h2>
+    <p data-i18n-html="confirm.intro">L'utilizzo dei video e degli audio scaricati è permesso <strong>solo nei casi consentiti</strong>, indicati in verde nelle <a href="/note-legali#casi-consentiti" target="_blank" rel="noopener">note legali</a>:</p>
     <ul class="allowed">
-      <li>video che hai caricato tu</li>
-      <li>video con licenza libera (Creative Commons, pubblico dominio)</li>
-      <li>video per cui hai il permesso dell'autore</li>
+      <li data-i18n="confirm.case1">video che hai caricato tu</li>
+      <li data-i18n="confirm.case2">video con licenza libera (Creative Commons, pubblico dominio)</li>
+      <li data-i18n="confirm.case3">video per cui hai il permesso dell'autore</li>
     </ul>
-    <p class="responsibility">Se continui e scarichi il video, ti assumi la piena responsabilità legale del suo utilizzo.</p>
-    <label for="user-name">Il tuo nome</label>
-    <input id="user-name" type="text" autocomplete="name" maxlength="80" required placeholder="Nome e cognome">
-    <p class="privacy-note" id="privacy-note">Il download viene annotato nel registro di Grabby con il tuo nome, data e ora e il link del video.</p>
+    <p class="responsibility" data-i18n="confirm.responsibility">Se continui e scarichi il video, ti assumi la piena responsabilità legale del suo utilizzo.</p>
+    <label for="user-name" data-i18n="confirm.name">Il tuo nome</label>
+    <input id="user-name" type="text" autocomplete="name" maxlength="80" required placeholder="Nome e cognome" data-i18n-placeholder="confirm.name.placeholder">
+    <p class="privacy-note" id="privacy-note" data-i18n="confirm.log.local">Il download viene annotato nel registro di Grabby con il tuo nome, data e ora e il link del video.</p>
     <div class="dialog-actions">
-      <button type="button" class="secondary" id="confirm-cancel">Annulla</button>
-      <button type="submit" class="primary" id="confirm-ok">Continua e scarica</button>
+      <button type="button" class="secondary" id="confirm-cancel" data-i18n="confirm.cancel">Annulla</button>
+      <button type="submit" class="primary" id="confirm-ok" data-i18n="confirm.ok">Continua e scarica</button>
     </div>
   </form>
 </dialog>
 
 <script>
   const $ = (id) => document.getElementById(id);
+  const t = i18n.t;
+
+  // Menu delle lingue con le bandiere.
+  function renderLanguageMenu() {
+    const lang = i18n.LANGUAGES.find((l) => l.code === i18n.lang);
+    $("lang-flag").src = `/static/flags/${lang.flag}.svg`;
+    $("lang-code").textContent = lang.code.toUpperCase();
+    $("lang-btn").setAttribute("aria-label", `${t("lang.label")}: ${lang.name}`);
+    $("lang-btn").title = t("lang.label");
+    const menu = $("lang-menu");
+    menu.innerHTML = "";
+    i18n.LANGUAGES.forEach((l) => {
+      const li = document.createElement("li");
+      li.setAttribute("role", "option");
+      li.tabIndex = 0;
+      li.lang = l.code;
+      li.dataset.code = l.code;
+      li.setAttribute("aria-selected", String(l.code === i18n.lang));
+      const img = document.createElement("img");
+      img.className = "flag";
+      img.alt = "";
+      img.src = `/static/flags/${l.flag}.svg`;
+      li.append(img, document.createTextNode(l.name));
+      menu.append(li);
+    });
+  }
+
+  function toggleLanguageMenu(open) {
+    $("lang-menu").hidden = !open;
+    $("lang-btn").setAttribute("aria-expanded", String(open));
+    if (open) ($("lang-menu").querySelector('[aria-selected="true"]') || $("lang-menu").firstChild).focus();
+  }
+
+  $("lang-btn").addEventListener("click", () => toggleLanguageMenu($("lang-menu").hidden));
+  $("lang-menu").addEventListener("click", (e) => {
+    const li = e.target.closest("li");
+    if (!li) return;
+    i18n.set(li.dataset.code);
+    toggleLanguageMenu(false);
+    $("lang-btn").focus();
+  });
+  $("lang-menu").addEventListener("keydown", (e) => {
+    const items = [...$("lang-menu").children];
+    const i = items.indexOf(document.activeElement);
+    if (e.key === "ArrowDown") { e.preventDefault(); items[(i + 1) % items.length].focus(); }
+    if (e.key === "ArrowUp") { e.preventDefault(); items[(i - 1 + items.length) % items.length].focus(); }
+    if (e.key === "Enter" || e.key === " ") { e.preventDefault(); document.activeElement.click(); }
+    if (e.key === "Escape") { toggleLanguageMenu(false); $("lang-btn").focus(); }
+  });
+  document.addEventListener("click", (e) => { if (!e.target.closest(".lang")) toggleLanguageMenu(false); });
+
+  i18n.apply();
+  renderLanguageMenu();
 
   // Sfondo dinamico: due livelli che si alternano in dissolvenza.
   const BACKGROUNDS = [1, 2, 3, 4, 5].map((n) => `/static/sfondi/sfondo-${n}.svg`);
@@ -231,8 +318,11 @@
   let canOpenFolder = true;
   let online = false;
   let availableHeights = null;
+  let downloadDir = "";
+  let progressState = null;
 
-  const resLabel = (r) => ({ best: "Migliore disponibile", 2160: "2160p (4K)", 1440: "1440p (2K)" }[r] || r + "p");
+  const resLabel = (r) => ({ best: t("res.best"), 2160: "2160p (4K)", 1440: "1440p (2K)" }[r] || r + "p");
+  const fmtLabel = (f) => (t("fmt." + f.value) === "fmt." + f.value ? f.label : t("fmt." + f.value));
 
   function fillResolutions() {
     const fmt = formats.find((f) => f.value === $("format").value);
@@ -241,7 +331,7 @@
     sel.innerHTML = "";
     sel.disabled = fmt && fmt.audio_only;
     if (sel.disabled) {
-      sel.add(new Option("Non necessaria (solo audio)", "best"));
+      sel.add(new Option(t("res.audio"), "best"));
       return;
     }
     allResolutions
@@ -250,9 +340,12 @@
     if ([...sel.options].some((o) => o.value === current)) sel.value = current;
   }
 
-  function showMsg(text, kind = "") {
+  function showMsg(text, kind = "", key = "") {
     $("msg").textContent = text;
     $("msg").className = "msg " + kind;
+    // Se il messaggio è un testo fisso, lo ricordiamo per tradurlo al cambio lingua.
+    $("msg").dataset.key = key;
+    $("msg").dataset.kind = kind;
   }
 
   async function api(path, body) {
@@ -262,8 +355,15 @@
       body: body ? JSON.stringify(body) : undefined,
     });
     const data = await res.json();
-    if (!res.ok) throw new Error(data.error || "Errore sconosciuto");
+    if (!res.ok) throw new Error(errorText(data));
     return data;
+  }
+
+  // Gli errori del server hanno un codice: il messaggio si traduce qui.
+  function errorText(data) {
+    const key = "err." + data.code;
+    if (!data.code || t(key) === key) return data.error || t("err.unknown");
+    return data.detail ? `${t(key)} ${data.detail}` : t(key);
   }
 
   function fmtDuration(s) {
@@ -285,16 +385,33 @@
     const opts = await api("/api/options");
     formats = opts.formats;
     allResolutions = opts.resolutions;
-    formats.forEach((f) => $("format").add(new Option(f.label, f.value)));
+    formats.forEach((f) => $("format").add(new Option(fmtLabel(f), f.value)));
     fillResolutions();
-    if (opts.download_dir) $("dir").textContent = "I file vengono salvati in: " + opts.download_dir;
+    downloadDir = opts.download_dir || "";
     canOpenFolder = opts.can_open_folder !== false;
     online = opts.online === true;
     if (online) {
       $("privacy-link").hidden = false;
-      $("privacy-note").innerHTML = 'Per tutelare il servizio registriamo il tuo nome, l\'indirizzo IP, il browser, la lingua, data e ora e il link del video. Dettagli nell\'<a href="/privacy" target="_blank" rel="noopener">informativa privacy</a>.';
+      $("privacy-note").removeAttribute("data-i18n");
+      $("privacy-note").dataset.i18nHtml = "confirm.log.online";
     }
+    translateDynamic();
   }
+
+  // Testi creati dallo script: si aggiornano quando cambia la lingua.
+  function translateDynamic() {
+    [...$("format").options].forEach((o) => { o.text = fmtLabel(formats.find((f) => f.value === o.value)); });
+    fillResolutions();
+    $("dir").textContent = downloadDir ? t("dir", { dir: downloadDir }) : "";
+    i18n.apply($("confirm"));
+    if (progressState) showProgress(progressState);
+  }
+
+  document.addEventListener("grabby:lang", () => {
+    renderLanguageMenu();
+    translateDynamic();
+    if ($("msg").dataset.key) showMsg(t($("msg").dataset.key), $("msg").dataset.kind);
+  });
 
   $("format").addEventListener("change", fillResolutions);
   $("url").addEventListener("input", () => { availableHeights = null; $("preview").style.display = "none"; fillResolutions(); resumeRotation(); });
@@ -302,9 +419,9 @@
 
   $("check").addEventListener("click", async () => {
     const url = $("url").value.trim();
-    if (!url) return showMsg("Incolla prima un link.", "error");
+    if (!url) return showMsg(t("msg.paste"), "error", "msg.paste");
     $("check").disabled = true;
-    showMsg("Analizzo il video…");
+    showMsg(t("msg.analyzing"), "", "msg.analyzing");
     try {
       const info = await api("/api/info", { url });
       $("thumb").src = info.thumbnail || "";
@@ -332,7 +449,7 @@
 
   $("download").addEventListener("click", () => {
     const url = $("url").value.trim();
-    if (!url) return showMsg("Incolla prima un link.", "error");
+    if (!url) return showMsg(t("msg.paste"), "error", "msg.paste");
     showMsg("");
     $("user-name").value = savedName();
     $("confirm").showModal();
@@ -353,10 +470,11 @@
     $("download").disabled = true;
     try {
       const job = await api("/api/download", {
-        url, format: $("format").value, resolution: $("resolution").value, name, accepted: true,
+        url, format: $("format").value, resolution: $("resolution").value, name, accepted: true, lang: i18n.lang,
       });
       $("progress-card").style.display = "block";
       $("open").style.display = "none";
+      showProgress({ status: "in coda", percent: 0 });
       poll(job.id);
     } catch (e) {
       showMsg(e.message, "error");
@@ -366,40 +484,47 @@
 
   $("open").addEventListener("click", () => api("/api/open-folder", {}));
 
-  const statusText = { "in coda": "In coda…", download: "Download in corso…", conversione: "Conversione in corso…" };
+  const statusKey = { "in coda": "status.queued", download: "status.downloading", conversione: "status.converting" };
+
+  function showProgress(j) {
+    progressState = j;
+    $("bar").style.width = j.percent + "%";
+    if (j.status === "completato") {
+      $("status").textContent = t("status.done");
+      $("details").textContent = online ? `${j.filename || ""} · ${t("status.browser")}` : j.filename || "";
+    } else if (j.status === "errore") {
+      $("status").textContent = t("status.error");
+      $("details").textContent = j.error || "";
+    } else {
+      $("status").textContent = (statusKey[j.status] ? t(statusKey[j.status]) : j.status) + " " + (j.status === "download" ? j.percent + "%" : "");
+      $("details").textContent = [fmtBytes(j.speed), j.eta ? t("eta", { time: fmtDuration(j.eta) }) : ""].filter(Boolean).join(" · ");
+    }
+  }
 
   async function poll(id) {
     try {
       const j = await api("/api/progress/" + id);
-      $("bar").style.width = j.percent + "%";
+      showProgress(j);
       if (j.status === "completato") {
-        $("status").textContent = "✅ Download completato!";
-        $("details").textContent = j.filename || "";
-        if (online) {
-          // Online il file è sul server: lo consegna al browser (e poi viene cancellato).
-          $("details").textContent = (j.filename || "") + " · il download parte dal browser";
-          window.location.href = "/api/file/" + j.id;
-        }
+        // Online il file è sul server: lo consegna al browser (e poi viene cancellato).
+        if (online) window.location.href = "/api/file/" + j.id;
         if (canOpenFolder) $("open").style.display = "inline-block";
         $("download").disabled = false;
         return;
       }
       if (j.status === "errore") {
-        $("status").textContent = "❌ Errore durante il download";
-        $("details").textContent = j.error || "";
         $("download").disabled = false;
         return;
       }
-      $("status").textContent = (statusText[j.status] || j.status) + " " + (j.status === "download" ? j.percent + "%" : "");
-      $("details").textContent = [fmtBytes(j.speed), j.eta ? "mancano " + fmtDuration(j.eta) : ""].filter(Boolean).join(" · ");
       setTimeout(() => poll(id), 700);
     } catch (e) {
+      progressState = null;
       $("status").textContent = "❌ " + e.message;
       $("download").disabled = false;
     }
   }
 
-  init().catch((e) => showMsg("Impossibile contattare il server: " + e.message, "error"));
+  init().catch((e) => showMsg(t("msg.server", { error: e.message }), "error"));
 </script>
 </body>
 </html>
