@@ -145,6 +145,17 @@ L'analisi completa, **Grabby e il diritto d'autore**, è in
 [`static/note-legali.html`](static/note-legali.html) e nell'app alla pagina
 http://127.0.0.1:8000/note-legali. Non è consulenza legale.
 
+## Lingue
+
+La pagina è in italiano, inglese, spagnolo, francese, tedesco e portoghese.
+Grabby usa la lingua del browser; puoi cambiarla in alto a destra dal menu con
+le bandiere, e la scelta viene ricordata. Per aprire Grabby in una lingua
+precisa aggiungi `?lang=` al link, per esempio `http://127.0.0.1:8000/?lang=en`.
+
+Le note legali e l'informativa privacy per ora sono solo in italiano: nelle
+altre lingue la pagina lo segnala con un avviso. I testi della pagina si
+trovano in `static/i18n.js`.
+
 ## Aggiornare Grabby
 
 YouTube e Facebook cambiano spesso: ogni avvio aggiorna già yt-dlp da solo.

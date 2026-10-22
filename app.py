@@ -63,6 +63,14 @@ def _json_body() -> dict:
     return request.get_json(silent=True) or {}
 
 
+def _error(code: str, message: str, status: int, detail: str = ""):
+    """Errore per la pagina: `code` permette di tradurre il messaggio nel browser."""
+    data = {"error": message, "code": code}
+    if detail:
+        data["detail"] = detail
+    return jsonify(data), status
+
+
 @app.get("/")
 def index():
     return send_from_directory(app.static_folder, "index.html")
@@ -95,13 +103,13 @@ def options():
 def info():
     url = (_json_body().get("url") or "").strip()
     if not is_supported_url(url):
-        return jsonify(error="Inserisci un link valido di YouTube o Facebook."), 400
+        return _error("invalid_url", "Inserisci un link valido di YouTube o Facebook.", 400)
     if ONLINE and not info_limiter.allow(request.remote_addr):
-        return jsonify(error="Troppe richieste: riprova tra un po'."), 429
+        return _error("too_many", "Troppe richieste: riprova tra un po'.", 429)
     try:
         return jsonify(get_info(url))
     except Exception as exc:  # noqa: BLE001
-        return jsonify(error=f"Impossibile leggere il video: {exc}"), 400
+        return _error("info_failed", f"Impossibile leggere il video: {exc}", 400, detail=str(exc))
 
 
 @app.post("/api/download")
@@ -113,17 +121,17 @@ def download():
     user_name = " ".join(str(body.get("name") or "").split())[:80]
     ip = request.remote_addr
     if not is_supported_url(url):
-        return jsonify(error="Inserisci un link valido di YouTube o Facebook."), 400
+        return _error("invalid_url", "Inserisci un link valido di YouTube o Facebook.", 400)
     if not user_name:
-        return jsonify(error="Scrivi il tuo nome prima di scaricare."), 400
+        return _error("name_required", "Scrivi il tuo nome prima di scaricare.", 400)
     if body.get("accepted") is not True:
-        return jsonify(error="Per scaricare devi accettare l'avviso di responsabilità."), 400
+        return _error("not_accepted", "Per scaricare devi accettare l'avviso di responsabilità.", 400)
     if ONLINE:
         jobs.sweep(FILE_MAX_AGE, delete_files=True)
         if jobs.active_count(ip) >= MAX_ACTIVE_PER_IP:
-            return jsonify(error="Hai già dei download in corso: aspetta che finiscano."), 429
+            return _error("busy", "Hai già dei download in corso: aspetta che finiscano.", 429)
         if not download_limiter.allow(ip):
-            return jsonify(error="Hai raggiunto il limite di download per quest'ora."), 429
+            return _error("rate_limited", "Hai raggiunto il limite di download per quest'ora.", 429)
     try:
         job = jobs.start(url, fmt, resolution, requested_by={
             "nome": user_name,
@@ -134,7 +142,7 @@ def download():
             "dichiarazione": f"accettata {DICHIARAZIONE_VERSIONE}",
         })
     except ValueError as exc:
-        return jsonify(error=str(exc)), 400
+        return _error("invalid_option", str(exc), 400)
     return jsonify(_public(job.to_dict())), 202
 
 
@@ -149,7 +157,7 @@ def _public(data: dict) -> dict:
 def progress(job_id):
     job = jobs.get(job_id)
     if job is None:
-        return jsonify(error="Download non trovato."), 404
+        return _error("not_found", "Download non trovato.", 404)
     return jsonify(_public(job.to_dict()))
 
 
