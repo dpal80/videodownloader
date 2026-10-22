@@ -59,7 +59,6 @@ def test_unknown_language_is_404(client):
 def test_rendered_text_matches_translations(client):
     page = client.get("/de/").get_data(as_text=True)
     assert ">Herunterladen</button>" in page
-    assert 'placeholder="' + seo.t("de", "confirm.name.placeholder") + '"' in page
     # Nessun testo italiano rimasto negli elementi tradotti.
     for key in re.findall(r'data-i18n="([^"]+)"', page):
         if seo.t("de", key) != seo.t("it", key):
@@ -69,7 +68,7 @@ def test_rendered_text_matches_translations(client):
 def test_translation_keys_stay_in_page(client):
     page = client.get("/fr/").get_data(as_text=True)
     assert 'data-i18n-href="legal"' in page and 'data-i18n-href="privacy"' in page
-    assert 'data-i18n-placeholder="confirm.name.placeholder"' in page
+    assert 'data-i18n-href="report"' in page and 'href="/segnalazioni?lang=fr"' in page
     assert 'data-i18n-label="langs.label"' in page
     assert 'href="undefined"' not in page
 

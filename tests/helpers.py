@@ -6,7 +6,6 @@ def download_request(**overrides) -> dict:
         "url": "https://youtu.be/x",
         "format": "mp4",
         "resolution": "720",
-        "name": "Mario Rossi",
         "accepted": True,
     }
     body.update(overrides)

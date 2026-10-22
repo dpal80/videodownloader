@@ -49,7 +49,6 @@ def test_flags_and_scripts_are_served(client):
     "overrides,code",
     [
         ({"url": "https://example.com/v"}, "invalid_url"),
-        ({"name": ""}, "name_required"),
         ({"accepted": False}, "not_accepted"),
         ({"format": "avi"}, "invalid_option"),
     ],

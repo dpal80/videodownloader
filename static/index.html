@@ -70,6 +70,8 @@
     .allowed li { padding-left: 24px; position: relative; margin: 4px 0; font-size: .93rem; }
     .allowed li::before { content: "✓"; position: absolute; left: 4px; color: var(--ok); font-weight: 700; }
     .responsibility { font-weight: 600; }
+    .accept { display: flex; gap: 10px; align-items: flex-start; font-weight: 600; font-size: .95rem; margin: 0 0 12px; cursor: pointer; }
+    .accept input { width: 20px; height: 20px; flex-shrink: 0; margin: 2px 0 0; accent-color: var(--brand-green); }
     .privacy-note { font-size: .82rem; color: var(--muted); }
     .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
     .dialog-actions .primary { width: auto; margin-top: 0; padding: 10px 16px; }
@@ -207,7 +209,7 @@
     <h2 data-i18n="faq.title">Domande frequenti</h2>
     <dl class="faq">
       <dt data-i18n="faq.q1">Grabby è gratuito?</dt>
-      <dd data-i18n="faq.a1">Sì, Grabby è gratuito e non serve registrarsi. Ti chiediamo solo il nome quando confermi l'avviso di responsabilità.</dd>
+      <dd data-i18n="faq.a1">Sì, Grabby è gratuito e non serve registrarsi: prima di ogni download ti chiediamo solo di confermare l'avviso di responsabilità.</dd>
       <dt data-i18n="faq.q2">Quali video posso scaricare?</dt>
       <dd data-i18n="faq.a2">Solo i video che hai il diritto di salvare: quelli caricati da te, quelli con licenza libera (Creative Commons, pubblico dominio) e quelli per cui hai il permesso dell'autore. I dettagli sono nelle note legali.</dd>
       <dt data-i18n="faq.q3">In quali formati posso salvare?</dt>
@@ -225,7 +227,7 @@
     <p><a href="/note-legali" data-i18n-href="legal" data-i18n="legal.more">Leggi l'analisi completa: Grabby e il diritto d'autore</a></p>
   </details>
 
-  <footer><span data-i18n="footer">Grabby · incolla, scegli, scarica.</span> · <a href="/note-legali" data-i18n-href="legal" data-i18n="footer.legal">Note legali</a><span id="privacy-link" hidden> · <a href="/privacy" data-i18n-href="privacy">Privacy</a></span>
+  <footer><span data-i18n="footer">Grabby · incolla, scegli, scarica.</span> · <a href="/note-legali" data-i18n-href="legal" data-i18n="footer.legal">Note legali</a><span id="privacy-link" hidden> · <a href="/privacy" data-i18n-href="privacy">Privacy</a> · <a href="/segnalazioni" data-i18n-href="report" data-i18n="footer.report">Segnala un contenuto</a></span>
     <nav class="langs" aria-label="Grabby in altre lingue" data-i18n-label="langs.label">
       <a href="/it/" hreflang="it" lang="it">Italiano</a> · <a href="/en/" hreflang="en" lang="en">English</a> · <a href="/es/" hreflang="es" lang="es">Español</a> · <a href="/fr/" hreflang="fr" lang="fr">Français</a> · <a href="/de/" hreflang="de" lang="de">Deutsch</a> · <a href="/pt/" hreflang="pt" lang="pt">Português</a>
     </nav>
@@ -242,9 +244,8 @@
       <li data-i18n="confirm.case3">video per cui hai il permesso dell'autore</li>
     </ul>
     <p class="responsibility" data-i18n="confirm.responsibility">Se continui e scarichi il video, ti assumi la piena responsabilità legale del suo utilizzo.</p>
-    <label for="user-name" data-i18n="confirm.name">Il tuo nome</label>
-    <input id="user-name" type="text" autocomplete="name" maxlength="80" required placeholder="Nome e cognome" data-i18n-placeholder="confirm.name.placeholder">
-    <p class="privacy-note" id="privacy-note" data-i18n="confirm.log.local">Il download viene annotato nel registro di Grabby con il tuo nome, data e ora e il link del video.</p>
+    <label class="accept"><input id="accept" type="checkbox" required> <span data-i18n="confirm.accept">Dichiaro che il video rientra nei casi consentiti e mi assumo la piena responsabilità del suo utilizzo.</span></label>
+    <p class="privacy-note" id="privacy-note" data-i18n="confirm.log.local">Il download viene annotato nel registro di Grabby con data e ora e il link del video.</p>
     <div class="dialog-actions">
       <button type="button" class="secondary" id="confirm-cancel" data-i18n="confirm.cancel">Annulla</button>
       <button type="submit" class="primary" id="confirm-ok" data-i18n="confirm.ok">Continua e scarica</button>
@@ -475,38 +476,35 @@
     }
   });
 
-  // Il nome viene ricordato dal browser per le volte successive.
-  function savedName() {
-    try { return localStorage.getItem("grabby-name") || ""; } catch (e) { return ""; }
-  }
-  function saveName(name) {
-    try { localStorage.setItem("grabby-name", name); } catch (e) { /* non indispensabile */ }
-  }
+  // Le versioni precedenti ricordavano il nome nel browser: ora non serve più.
+  try { localStorage.removeItem("grabby-name"); } catch (e) { /* non indispensabile */ }
 
   $("download").addEventListener("click", () => {
     const url = $("url").value.trim();
     if (!url) return showMsg(t("msg.paste"), "error", "msg.paste");
     showMsg("");
-    $("user-name").value = savedName();
+    $("accept").checked = false;
+    $("confirm-ok").disabled = true;
     $("confirm").showModal();
-    $("user-name").focus();
+    $("accept").focus();
   });
 
   $("confirm-cancel").addEventListener("click", () => $("confirm").close());
+  // Il pulsante si attiva solo dopo aver spuntato la dichiarazione.
+  $("accept").addEventListener("change", () => { $("confirm-ok").disabled = !$("accept").checked; });
 
   $("confirm-form").addEventListener("submit", (e) => {
-    const name = $("user-name").value.trim();
-    if (!name) { e.preventDefault(); $("user-name").focus(); return; }
-    saveName(name);
-    startDownload(name);
+    if (!$("accept").checked) { e.preventDefault(); $("accept").focus(); return; }
+    startDownload();
   });
 
-  async function startDownload(name) {
+  async function startDownload() {
     const url = $("url").value.trim();
     $("download").disabled = true;
     try {
       const job = await api("/api/download", {
-        url, format: $("format").value, resolution: $("resolution").value, name, accepted: true, lang: i18n.lang,
+        url, format: $("format").value, resolution: $("resolution").value, accepted: $("accept").checked,
+        lang: i18n.lang, ref: document.referrer,
       });
       $("progress-card").style.display = "block";
       $("open").style.display = "none";

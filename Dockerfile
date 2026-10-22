@@ -9,7 +9,7 @@ WORKDIR /app
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-COPY app.py downloader.py registro.py seo.py ./
+COPY app.py downloader.py registro.py seo.py geo.py blocchi.py ./
 COPY static ./static
 
 # Dentro il container ascolta su tutte le interfacce; i file vanno in /downloads.

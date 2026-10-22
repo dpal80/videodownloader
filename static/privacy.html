@@ -98,17 +98,18 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
     <div class="table-wrap">
       <table>
         <tr><th>Dato</th><th>Esempio</th><th>Perché serve</th></tr>
-        <tr><td>Nome che indichi nel modulo</td><td>Mario R.</td><td>Sapere chi dichiara di assumersi la responsabilità</td></tr>
-        <tr><td>Indirizzo IP</td><td>93.41.x.x</td><td>Identificare la connessione da cui è partita la richiesta</td></tr>
+        <tr><td>Indirizzo IP e porta di origine della connessione</td><td>93.41.x.x, porta 51234</td><td>Identificare la connessione da cui è partita la richiesta: quando più utenti condividono lo stesso IP, il provider internet può risalire all'abbonato solo con IP, porta e ora</td></tr>
+        <tr><td>Paese, città approssimativa e provider internet</td><td>Italia, Milano, TIM</td><td>Ricavati dall'IP con un database installato sul nostro server, senza inviare dati a terzi: servono a capire da dove arrivano le richieste e a riconoscere gli abusi</td></tr>
         <tr><td>Data e ora</td><td>22/10/2026 18:04</td><td>Collocare la richiesta nel tempo</td></tr>
         <tr><td>Browser e sistema operativo (user-agent)</td><td>Safari 19 su macOS</td><td>Distinguere richieste diverse dalla stessa rete</td></tr>
-        <tr><td>Lingua del browser</td><td>it-IT</td><td>Contesto della richiesta</td></tr>
+        <tr><td>Lingua del browser e della pagina</td><td>it-IT</td><td>Contesto della richiesta</td></tr>
+        <tr><td>Pagina di provenienza</td><td>google.com</td><td>Contesto della richiesta</td></tr>
         <tr><td>Link del video, titolo, formato e risoluzione</td><td>youtube.com/watch?v=…</td><td>Sapere quale contenuto è stato richiesto</td></tr>
-        <tr><td>Accettazione della dichiarazione di responsabilità</td><td>sì, testo versione 1</td><td>Documentare che l'utente ha dichiarato di avere il diritto di scaricare</td></tr>
+        <tr><td>Dichiarazione con la casella spuntata</td><td>sì, testo versione 3</td><td>Documentare che l'utente ha dichiarato che il video rientra nei casi consentiti</td></tr>
         <tr><td>Esito del download</td><td>completato / errore</td><td>Completezza del registro</td></tr>
       </table>
     </div>
-    <p>Non usiamo cookie di profilazione né tecniche di <em>fingerprinting</em>, e non chiediamo di registrarti. Usiamo solo un cookie tecnico, <code>grabby-lang</code>, che ricorda la lingua scelta nel menu per un anno; il nome che scrivi nell'avviso resta salvato solo nel tuo browser, per le volte successive. I file scaricati non restano sui nostri server: vengono consegnati al tuo browser e cancellati subito dopo; quelli non ritirati si cancellano comunque entro un'ora.</p>
+    <p>Non usiamo cookie di profilazione né tecniche di <em>fingerprinting</em>, e non chiediamo di registrarti. Non ti chiediamo il nome e non leggiamo informazioni dal tuo dispositivo oltre a quelle che il browser invia da solo a ogni sito. Usiamo solo un cookie tecnico, <code>grabby-lang</code>, che ricorda la lingua scelta nel menu per un anno. I file scaricati non restano sui nostri server: vengono consegnati al tuo browser e cancellati subito dopo; quelli non ritirati si cancellano comunque entro un'ora.</p>
   </section>
 
   <section>
@@ -140,6 +141,11 @@ footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--lin
   <section>
     <h2>7. Il conferimento è obbligatorio?</h2>
     <p>Sì, per usare il servizio: senza questi dati non possiamo avviare il download. Se non vuoi fornirli, puoi semplicemente non usare Grabby.</p>
+  </section>
+
+  <section>
+    <h2>8. Fonti dei dati di localizzazione</h2>
+    <p>Paese, città e provider sono stimati dall'indirizzo IP con i database gratuiti <a href="https://db-ip.com" target="_blank" rel="noopener">IP Geolocation by DB-IP</a> (licenza CC BY 4.0), salvati sul nostro server. La stima può essere imprecisa e non indica mai l'indirizzo di casa.</p>
   </section>
 
   <footer>Bozza del 22 ottobre 2026 · da far rivedere a un avvocato prima della pubblicazione · <a href="/note-legali">Note legali</a></footer>
