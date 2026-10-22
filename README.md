@@ -1,6 +1,9 @@
-# Video Downloader
+# Prendilo
 
-Una piccola app locale per scaricare video da **YouTube** e **Facebook**.
+<img src="static/logo.svg" alt="Logo di Prendilo" width="96">
+
+**Prendilo** (ex Video Downloader): una piccola app locale per scaricare video da **YouTube** e **Facebook**.
+
 Si usa da una pagina web che gira solo sul tuo Mac: incolli il link, scegli
 formato e risoluzione e premi **Scarica**.
 

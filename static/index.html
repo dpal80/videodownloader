@@ -3,7 +3,8 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Video Downloader</title>
+  <title>Prendilo</title>
+  <link rel="icon" href="/static/logo.svg" type="image/svg+xml">
   <style>
     :root {
       --bg: #f5f6f8; --card: #ffffff; --text: #1d1f23; --muted: #6b7280;
@@ -23,6 +24,7 @@
     }
     main { max-width: 640px; margin: 48px auto; padding: 0 16px; }
     h1 { font-size: 1.6rem; margin: 0 0 4px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
     .sub { color: var(--muted); margin: 0 0 24px; }
     .card {
       background: var(--card); border: 1px solid var(--border); border-radius: 12px;
@@ -62,7 +64,7 @@
 </head>
 <body>
 <main>
-  <h1>Video Downloader</h1>
+  <h1 class="brand"><img src="/static/logo.svg" alt="" width="40" height="40"> Prendilo</h1>
   <p class="sub">Incolla un link di YouTube o Facebook, scegli formato e risoluzione e scarica.</p>
 
   <div class="card">
