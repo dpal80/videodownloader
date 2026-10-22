@@ -69,3 +69,37 @@ def test_errors_have_translatable_code(client, overrides, code):
 
 def test_progress_not_found_code(client):
     assert client.get("/api/progress/nope").get_json()["code"] == "not_found"
+
+
+@pytest.mark.parametrize("lang", ["en", "es", "fr", "de", "pt"])
+def test_legal_notes_translated(client, lang):
+    page = client.get(f"/note-legali?lang={lang}").get_data(as_text=True)
+    assert f'<html lang="{lang}"' in page
+    assert 'id="casi-consentiti"' in page
+    assert "/static/pagine-legali.js" in page
+
+
+def test_legal_notes_language_fallback(client):
+    assert '<html lang="it"' in client.get("/note-legali").get_data(as_text=True)
+    assert '<html lang="it"' in client.get("/note-legali?lang=xx").get_data(as_text=True)
+    page = client.get("/note-legali", headers={"Accept-Language": "de-DE,de;q=0.9"}).get_data(as_text=True)
+    assert '<html lang="de"' in page
+
+
+def test_legal_translations_keep_structure():
+    """Ogni traduzione ha le stesse sezioni, scenari e righe di tabella dell'originale."""
+    original = (STATIC / "note-legali.html").read_text(encoding="utf-8")
+    for lang in ("en", "es", "fr", "de", "pt"):
+        page = (STATIC / f"note-legali.{lang}.html").read_text(encoding="utf-8")
+        for tag in ("<section", 'class="scenario"', "<tr>", "<li>", "<blockquote>", 'href="http'):
+            assert page.count(tag) == original.count(tag), (lang, tag)
+        assert 'data-translations="it en es fr de pt"' in page
+
+
+def test_log_records_page_language():
+    import app as app_module
+
+    assert app_module._log_language("en", "it-IT") == "en (browser: it-IT)"
+    assert app_module._log_language("it", "it") == "it"
+    assert app_module._log_language(None, "it-IT") == "it-IT"
+    assert app_module._log_language("xx", "it-IT") == "it-IT"

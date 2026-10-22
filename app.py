@@ -14,6 +14,8 @@ from downloader import FORMATS, RESOLUTIONS, JobManager, get_info, is_supported_
 from registro import DICHIARAZIONE, DICHIARAZIONE_VERSIONE, DownloadLog, computer_user
 
 ONLINE = os.environ.get("GRABBY_MODE", "local").lower() == "online"
+# Lingue della pagina: devono coincidere con LANGUAGES in static/i18n.js.
+LANGUAGES = ("it", "en", "es", "fr", "de", "pt")
 # Online i file restano sul server solo finché l'utente li scarica.
 FILE_MAX_AGE = 3600
 DOWNLOADS_PER_HOUR = int(os.environ.get("GRABBY_LIMITE_ORARIO", "10"))
@@ -76,9 +78,20 @@ def index():
     return send_from_directory(app.static_folder, "index.html")
 
 
+def _page_language() -> str:
+    """Lingua chiesta con ?lang=xx, altrimenti quella del browser; italiano se non c'è."""
+    lang = request.args.get("lang", "")
+    if lang in LANGUAGES:
+        return lang
+    return request.accept_languages.best_match(LANGUAGES, default="it")
+
+
 @app.get("/note-legali")
 def legal_notes():
-    return send_from_directory(app.static_folder, "note-legali.html")
+    # Le traduzioni sono di cortesia: fa fede il testo italiano.
+    lang = _page_language()
+    name = "note-legali.html" if lang == "it" else f"note-legali.{lang}.html"
+    return send_from_directory(app.static_folder, name)
 
 
 @app.get("/privacy")
@@ -138,12 +151,19 @@ def download():
             "utente_computer": "" if ONLINE else computer_user(),
             "ip": ip,
             "browser": request.headers.get("User-Agent", "")[:300],
-            "lingua": request.headers.get("Accept-Language", "")[:100],
+            "lingua": _log_language(body.get("lang"), request.headers.get("Accept-Language", "")[:100]),
             "dichiarazione": f"accettata {DICHIARAZIONE_VERSIONE}",
         })
     except ValueError as exc:
         return _error("invalid_option", str(exc), 400)
     return jsonify(_public(job.to_dict())), 202
+
+
+def _log_language(page_lang, browser_lang: str) -> str:
+    """Nel registro: lingua scelta nella pagina e, tra parentesi, quella del browser."""
+    if page_lang in LANGUAGES and page_lang != browser_lang:
+        return f"{page_lang} (browser: {browser_lang})" if browser_lang else page_lang
+    return browser_lang
 
 
 def _public(data: dict) -> dict:

@@ -469,7 +469,7 @@
     $("download").disabled = true;
     try {
       const job = await api("/api/download", {
-        url, format: $("format").value, resolution: $("resolution").value, name, accepted: true,
+        url, format: $("format").value, resolution: $("resolution").value, name, accepted: true, lang: i18n.lang,
       });
       $("progress-card").style.display = "block";
       $("open").style.display = "none";

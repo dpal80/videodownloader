@@ -152,9 +152,11 @@ Grabby usa la lingua del browser; puoi cambiarla in alto a destra dal menu con
 le bandiere, e la scelta viene ricordata. Per aprire Grabby in una lingua
 precisa aggiungi `?lang=` al link, per esempio `http://127.0.0.1:8000/?lang=en`.
 
-Le note legali e l'informativa privacy per ora sono solo in italiano: nelle
-altre lingue la pagina lo segnala con un avviso. I testi della pagina si
-trovano in `static/i18n.js`.
+Le note legali sono tradotte in tutte le lingue (`static/note-legali.<lingua>.html`).
+Le traduzioni sono di cortesia: fa fede il testo italiano (`static/note-legali.html`),
+e se cambi quello ricordati di aggiornare anche le traduzioni. L'informativa
+privacy per ora è solo in italiano: nelle altre lingue la pagina lo segnala con
+un avviso. I testi della pagina si trovano in `static/i18n.js`.
 
 ## Aggiornare Grabby
 
