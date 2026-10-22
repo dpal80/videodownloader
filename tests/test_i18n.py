@@ -1,8 +1,9 @@
-import json
 import re
 from pathlib import Path
 
 import pytest
+
+import seo
 
 from app import app
 from tests.helpers import download_request
@@ -18,12 +19,7 @@ def client():
 
 
 def _strings() -> dict:
-    """Legge il dizionario STRINGS di i18n.js (le chiavi e i testi sono stringhe JSON)."""
-    source = (STATIC / "i18n.js").read_text(encoding="utf-8")
-    strings = {}
-    for lang, body in re.findall(r"^    (\w\w): \{\n(.*?)\n    \},", source, re.S | re.M):
-        strings[lang] = json.loads("{" + body.rstrip().rstrip(",") + "}")
-    return strings
+    return seo.strings()
 
 
 def test_every_language_has_every_string():

@@ -22,3 +22,9 @@
 	# Nessuna direttiva "log": Caddy non scrive log degli accessi. L'unico
 	# registro con dati personali è quello di Grabby, con la sua scadenza.
 }
+
+# www.{$DOMINIO} rimanda all'indirizzo principale, così Google vede un solo sito.
+# Serve anche il record DNS per www.
+www.{$DOMINIO} {
+	redir https://{$DOMINIO}{uri} permanent
+}

@@ -64,7 +64,7 @@ def client():
 
 
 def test_index_served(client):
-    res = client.get("/")
+    res = client.get("/", follow_redirects=True)
     assert res.status_code == 200
     assert b"Grabby Video Downloader" in res.data
 
