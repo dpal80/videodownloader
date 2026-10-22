@@ -72,6 +72,22 @@
       "err.invalid_option": "Formato o risoluzione non validi.",
       "back": "Torna a Grabby",
       "legal.only_it": "Questa pagina è disponibile solo in italiano.",
+      "meta.title": "Grabby Video Downloader – scarica video da YouTube e Facebook",
+      "meta.description": "Scarica in MP4, WebM, MP3 o M4A i video di YouTube e Facebook che hai il diritto di salvare: incolla il link, scegli formato e risoluzione. Gratis, senza registrazione.",
+      "howto.title": "Come funziona",
+      "howto.1": "Copia il link del video da YouTube o Facebook e incollalo qui sopra.",
+      "howto.2": "Scegli il formato (MP4 o WebM per il video, MP3 o M4A per il solo audio) e la risoluzione.",
+      "howto.3": "Premi Scarica, conferma che il video rientra nei casi consentiti e il download parte.",
+      "faq.title": "Domande frequenti",
+      "faq.q1": "Grabby è gratuito?",
+      "faq.a1": "Sì, Grabby è gratuito e non serve registrarsi. Ti chiediamo solo il nome quando confermi l'avviso di responsabilità.",
+      "faq.q2": "Quali video posso scaricare?",
+      "faq.a2": "Solo i video che hai il diritto di salvare: quelli caricati da te, quelli con licenza libera (Creative Commons, pubblico dominio) e quelli per cui hai il permesso dell'autore. I dettagli sono nelle note legali.",
+      "faq.q3": "In quali formati posso salvare?",
+      "faq.a3": "Video in MP4 o WebM, fino al 4K se il video originale lo permette; solo audio in MP3 o M4A.",
+      "faq.q4": "Funziona con i video protetti o a pagamento?",
+      "faq.a4": "No. Grabby non aggira sistemi di protezione (DRM) e non scarica contenuti a pagamento o privati.",
+      "langs.label": "Grabby in altre lingue",
     },
     en: {
       "page.title": "Grabby Video Downloader",
@@ -132,6 +148,22 @@
       "err.invalid_option": "Invalid format or resolution.",
       "back": "Back to Grabby",
       "legal.only_it": "This page is only available in Italian for now.",
+      "meta.title": "Grabby Video Downloader – download videos from YouTube and Facebook",
+      "meta.description": "Download YouTube and Facebook videos you have the right to save as MP4, WebM, MP3 or M4A: paste the link, choose format and resolution. Free, no sign-up.",
+      "howto.title": "How it works",
+      "howto.1": "Copy the video link from YouTube or Facebook and paste it above.",
+      "howto.2": "Choose the format (MP4 or WebM for video, MP3 or M4A for audio only) and the resolution.",
+      "howto.3": "Press Download, confirm that the video falls within the allowed cases, and the download starts.",
+      "faq.title": "Frequently asked questions",
+      "faq.q1": "Is Grabby free?",
+      "faq.a1": "Yes, Grabby is free and you don't need an account. We only ask for your name when you confirm the responsibility notice.",
+      "faq.q2": "Which videos can I download?",
+      "faq.a2": "Only videos you have the right to save: those you uploaded yourself, freely licensed ones (Creative Commons, public domain) and those you have the author's permission for. Details are in the legal notes.",
+      "faq.q3": "Which formats can I save in?",
+      "faq.a3": "Video in MP4 or WebM, up to 4K if the original allows it; audio only in MP3 or M4A.",
+      "faq.q4": "Does it work with protected or paid videos?",
+      "faq.a4": "No. Grabby does not circumvent protection systems (DRM) and does not download paid or private content.",
+      "langs.label": "Grabby in other languages",
     },
     es: {
       "page.title": "Grabby Video Downloader",
@@ -192,6 +224,22 @@
       "err.invalid_option": "Formato o resolución no válidos.",
       "back": "Volver a Grabby",
       "legal.only_it": "Por ahora esta página solo está disponible en italiano.",
+      "meta.title": "Grabby Video Downloader – descarga vídeos de YouTube y Facebook",
+      "meta.description": "Descarga en MP4, WebM, MP3 o M4A los vídeos de YouTube y Facebook que tienes derecho a guardar: pega el enlace y elige formato y resolución. Gratis, sin registro.",
+      "howto.title": "Cómo funciona",
+      "howto.1": "Copia el enlace del vídeo de YouTube o Facebook y pégalo arriba.",
+      "howto.2": "Elige el formato (MP4 o WebM para vídeo, MP3 o M4A solo para audio) y la resolución.",
+      "howto.3": "Pulsa Descargar, confirma que el vídeo está dentro de los casos permitidos y empieza la descarga.",
+      "faq.title": "Preguntas frecuentes",
+      "faq.q1": "¿Grabby es gratuito?",
+      "faq.a1": "Sí, Grabby es gratuito y no hace falta registrarse. Solo te pedimos tu nombre cuando confirmas el aviso de responsabilidad.",
+      "faq.q2": "¿Qué vídeos puedo descargar?",
+      "faq.a2": "Solo los vídeos que tienes derecho a guardar: los que has subido tú, los que tienen licencia libre (Creative Commons, dominio público) y aquellos para los que tienes el permiso del autor. Los detalles están en los avisos legales.",
+      "faq.q3": "¿En qué formatos puedo guardar?",
+      "faq.a3": "Vídeo en MP4 o WebM, hasta 4K si el original lo permite; solo audio en MP3 o M4A.",
+      "faq.q4": "¿Funciona con vídeos protegidos o de pago?",
+      "faq.a4": "No. Grabby no elude sistemas de protección (DRM) ni descarga contenidos de pago o privados.",
+      "langs.label": "Grabby en otros idiomas",
     },
     fr: {
       "page.title": "Grabby Video Downloader",
@@ -252,6 +300,22 @@
       "err.invalid_option": "Format ou résolution non valide.",
       "back": "Retour à Grabby",
       "legal.only_it": "Pour l'instant, cette page n'est disponible qu'en italien.",
+      "meta.title": "Grabby Video Downloader – téléchargez des vidéos YouTube et Facebook",
+      "meta.description": "Téléchargez en MP4, WebM, MP3 ou M4A les vidéos YouTube et Facebook que vous avez le droit d'enregistrer : collez le lien, choisissez format et résolution. Gratuit, sans inscription.",
+      "howto.title": "Comment ça marche",
+      "howto.1": "Copiez le lien de la vidéo YouTube ou Facebook et collez-le ci-dessus.",
+      "howto.2": "Choisissez le format (MP4 ou WebM pour la vidéo, MP3 ou M4A pour l'audio seul) et la résolution.",
+      "howto.3": "Appuyez sur Télécharger, confirmez que la vidéo entre dans les cas autorisés et le téléchargement commence.",
+      "faq.title": "Questions fréquentes",
+      "faq.q1": "Grabby est-il gratuit ?",
+      "faq.a1": "Oui, Grabby est gratuit et ne nécessite pas d'inscription. Nous vous demandons seulement votre nom lorsque vous confirmez l'avis de responsabilité.",
+      "faq.q2": "Quelles vidéos puis-je télécharger ?",
+      "faq.a2": "Uniquement les vidéos que vous avez le droit d'enregistrer : celles que vous avez mises en ligne, celles sous licence libre (Creative Commons, domaine public) et celles pour lesquelles vous avez l'autorisation de l'auteur. Les détails figurent dans les mentions légales.",
+      "faq.q3": "Dans quels formats puis-je enregistrer ?",
+      "faq.a3": "Vidéo en MP4 ou WebM, jusqu'en 4K si l'original le permet ; audio seul en MP3 ou M4A.",
+      "faq.q4": "Est-ce que ça marche avec les vidéos protégées ou payantes ?",
+      "faq.a4": "Non. Grabby ne contourne pas les systèmes de protection (DRM) et ne télécharge pas de contenus payants ou privés.",
+      "langs.label": "Grabby dans d'autres langues",
     },
     de: {
       "page.title": "Grabby Video Downloader",
@@ -312,6 +376,22 @@
       "err.invalid_option": "Ungültiges Format oder ungültige Auflösung.",
       "back": "Zurück zu Grabby",
       "legal.only_it": "Diese Seite ist derzeit nur auf Italienisch verfügbar.",
+      "meta.title": "Grabby Video Downloader – Videos von YouTube und Facebook herunterladen",
+      "meta.description": "Lade YouTube- und Facebook-Videos, die du speichern darfst, als MP4, WebM, MP3 oder M4A herunter: Link einfügen, Format und Auflösung wählen. Kostenlos, ohne Anmeldung.",
+      "howto.title": "So funktioniert's",
+      "howto.1": "Kopiere den Link des Videos von YouTube oder Facebook und füge ihn oben ein.",
+      "howto.2": "Wähle das Format (MP4 oder WebM für Video, MP3 oder M4A nur für Audio) und die Auflösung.",
+      "howto.3": "Klicke auf Herunterladen, bestätige, dass das Video zu den erlaubten Fällen gehört, und der Download startet.",
+      "faq.title": "Häufige Fragen",
+      "faq.q1": "Ist Grabby kostenlos?",
+      "faq.a1": "Ja, Grabby ist kostenlos und du brauchst kein Konto. Wir fragen nur nach deinem Namen, wenn du den Verantwortungshinweis bestätigst.",
+      "faq.q2": "Welche Videos darf ich herunterladen?",
+      "faq.a2": "Nur Videos, die du speichern darfst: selbst hochgeladene, frei lizenzierte (Creative Commons, gemeinfrei) und solche, für die du die Erlaubnis des Urhebers hast. Details findest du in den rechtlichen Hinweisen.",
+      "faq.q3": "In welchen Formaten kann ich speichern?",
+      "faq.a3": "Video als MP4 oder WebM, bis 4K, wenn das Original es hergibt; nur Audio als MP3 oder M4A.",
+      "faq.q4": "Funktioniert es mit geschützten oder kostenpflichtigen Videos?",
+      "faq.a4": "Nein. Grabby umgeht keine Schutzsysteme (DRM) und lädt keine kostenpflichtigen oder privaten Inhalte herunter.",
+      "langs.label": "Grabby in anderen Sprachen",
     },
     pt: {
       "page.title": "Grabby Video Downloader",
@@ -372,6 +452,22 @@
       "err.invalid_option": "Formato ou resolução inválidos.",
       "back": "Voltar ao Grabby",
       "legal.only_it": "Por enquanto, esta página só está disponível em italiano.",
+      "meta.title": "Grabby Video Downloader – descarregar vídeos do YouTube e do Facebook",
+      "meta.description": "Descarrega em MP4, WebM, MP3 ou M4A os vídeos do YouTube e do Facebook que tens direito a guardar: cola o link e escolhe formato e resolução. Grátis, sem registo.",
+      "howto.title": "Como funciona",
+      "howto.1": "Copia o link do vídeo do YouTube ou do Facebook e cola-o acima.",
+      "howto.2": "Escolhe o formato (MP4 ou WebM para vídeo, MP3 ou M4A só para áudio) e a resolução.",
+      "howto.3": "Carrega em Descarregar, confirma que o vídeo está nos casos permitidos e a transferência começa.",
+      "faq.title": "Perguntas frequentes",
+      "faq.q1": "O Grabby é gratuito?",
+      "faq.a1": "Sim, o Grabby é gratuito e não precisas de te registar. Só te pedimos o nome quando confirmas o aviso de responsabilidade.",
+      "faq.q2": "Que vídeos posso descarregar?",
+      "faq.a2": "Só os vídeos que tens direito a guardar: os que carregaste tu, os que têm licença livre (Creative Commons, domínio público) e aqueles para os quais tens autorização do autor. Os detalhes estão nas notas legais.",
+      "faq.q3": "Em que formatos posso guardar?",
+      "faq.a3": "Vídeo em MP4 ou WebM, até 4K se o original o permitir; só áudio em MP3 ou M4A.",
+      "faq.q4": "Funciona com vídeos protegidos ou pagos?",
+      "faq.a4": "Não. O Grabby não contorna sistemas de proteção (DRM) nem descarrega conteúdos pagos ou privados.",
+      "langs.label": "Grabby noutras línguas",
     },
   };
 
@@ -382,6 +478,12 @@
   }
 
   function detect() {
+    // Indirizzi per lingua (/en/, /de/...): la lingua è quella dell'indirizzo.
+    const fromPath = (location.pathname.match(/^\/([a-z]{2})\//) || [])[1];
+    if (supported.includes(fromPath)) {
+      try { localStorage.setItem("grabby-lang", fromPath); } catch (e) { /* non indispensabile */ }
+      return fromPath;
+    }
     const fromUrl = new URLSearchParams(location.search).get("lang");
     if (supported.includes(fromUrl)) {
       // Anche la lingua scelta con il link viene ricordata.
@@ -413,14 +515,19 @@
     // Solo testi statici di questo file: nessun dato dell'utente finisce in innerHTML.
     root.querySelectorAll("[data-i18n-html]").forEach((el) => { el.innerHTML = t(el.dataset.i18nHtml, links()); });
     root.querySelectorAll("[data-i18n-placeholder]").forEach((el) => { el.placeholder = t(el.dataset.i18nPlaceholder); });
+    root.querySelectorAll("[data-i18n-label]").forEach((el) => { el.setAttribute("aria-label", t(el.dataset.i18nLabel)); });
     root.querySelectorAll("a[data-i18n-href]").forEach((el) => { el.href = links()[el.dataset.i18nHref]; });
-    document.title = t("page.title");
+    document.title = t("meta.title");
+    const description = document.querySelector('meta[name="description"]');
+    if (description) description.content = t("meta.description");
   }
 
   function set(code) {
     if (!supported.includes(code)) return;
     current = code;
     try { localStorage.setItem("grabby-lang", code); } catch (e) { /* non indispensabile */ }
+    // Cookie tecnico di preferenza: il server apre la pagina nella lingua scelta.
+    document.cookie = `grabby-lang=${code}; path=/; max-age=31536000; SameSite=Lax`;
     apply();
     document.dispatchEvent(new CustomEvent("grabby:lang", { detail: code }));
   }

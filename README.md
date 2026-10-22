@@ -158,6 +158,14 @@ e se cambi quello ricordati di aggiornare anche le traduzioni. L'informativa
 privacy per ora è solo in italiano: nelle altre lingue la pagina lo segnala con
 un avviso. I testi della pagina si trovano in `static/i18n.js`.
 
+Ogni lingua ha il suo indirizzo (`/it/`, `/en/`, `/es/`, `/fr/`, `/de/`, `/pt/`).
+L'indirizzo principale `/` apre la lingua scelta nel menu, oppure quella del
+browser. Il server manda la pagina già tradotta, con i tag per i motori di
+ricerca (descrizione, hreflang, canonical, anteprima per i social), e serve
+anche `robots.txt` e `sitemap.xml`. L'indirizzo pubblico usato in questi tag è
+`GRABBY_URL_PUBBLICO` (predefinito `https://grabbyvideodownloader.app`). In
+locale `robots.txt` chiede ai motori di ricerca di non indicizzare nulla.
+
 ## Aggiornare Grabby
 
 YouTube e Facebook cambiano spesso: ogni avvio aggiorna già yt-dlp da solo.

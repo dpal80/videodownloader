@@ -6,16 +6,17 @@ import sys
 import threading
 import time
 from collections import defaultdict, deque
+from pathlib import Path
 
-from flask import Flask, jsonify, request, send_file, send_from_directory
+from flask import Flask, abort, jsonify, redirect, request, send_file, send_from_directory
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+import seo
 from downloader import FORMATS, RESOLUTIONS, JobManager, get_info, is_supported_url
 from registro import DICHIARAZIONE, DICHIARAZIONE_VERSIONE, DownloadLog, computer_user
 
 ONLINE = os.environ.get("GRABBY_MODE", "local").lower() == "online"
-# Lingue della pagina: devono coincidere con LANGUAGES in static/i18n.js.
-LANGUAGES = ("it", "en", "es", "fr", "de", "pt")
+LANGUAGES = seo.LANGUAGES
 # Online i file restano sul server solo finché l'utente li scarica.
 FILE_MAX_AGE = 3600
 DOWNLOADS_PER_HOUR = int(os.environ.get("GRABBY_LIMITE_ORARIO", "10"))
@@ -73,25 +74,52 @@ def _error(code: str, message: str, status: int, detail: str = ""):
     return jsonify(data), status
 
 
+def _preferred_language(default: str) -> str:
+    """Lingua chiesta con ?lang=xx, poi quella scelta nel menu, poi quella del browser."""
+    for lang in (request.args.get("lang", ""), request.cookies.get("grabby-lang", "")):
+        if lang in LANGUAGES:
+            return lang
+    return request.accept_languages.best_match(LANGUAGES, default=default)
+
+
 @app.get("/")
 def index():
-    return send_from_directory(app.static_folder, "index.html")
+    # Ogni lingua ha il suo indirizzo (/it/, /en/...): qui scegliamo quale aprire.
+    response = redirect(f"/{_preferred_language(seo.DEFAULT_LANGUAGE)}/", 302)
+    response.headers["Vary"] = "Accept-Language, Cookie"
+    return response
 
 
-def _page_language() -> str:
-    """Lingua chiesta con ?lang=xx, altrimenti quella del browser; italiano se non c'è."""
-    lang = request.args.get("lang", "")
-    if lang in LANGUAGES:
-        return lang
-    return request.accept_languages.best_match(LANGUAGES, default="it")
+@app.get("/<lang>/")
+def home(lang):
+    if lang not in LANGUAGES:
+        abort(404)
+    return seo.home_page(lang), {"Content-Type": "text/html; charset=utf-8"}
 
 
 @app.get("/note-legali")
 def legal_notes():
     # Le traduzioni sono di cortesia: fa fede il testo italiano.
-    lang = _page_language()
+    lang = _preferred_language("it")
     name = "note-legali.html" if lang == "it" else f"note-legali.{lang}.html"
-    return send_from_directory(app.static_folder, name)
+    page = (Path(app.static_folder) / name).read_text(encoding="utf-8")
+    page = page.replace("</head>", seo.legal_head(lang) + "</head>", 1)
+    return page, {"Content-Type": "text/html; charset=utf-8"}
+
+
+@app.get("/robots.txt")
+def robots():
+    return seo.robots_txt(ONLINE), {"Content-Type": "text/plain; charset=utf-8"}
+
+
+@app.get("/sitemap.xml")
+def sitemap():
+    return seo.sitemap_xml(), {"Content-Type": "application/xml; charset=utf-8"}
+
+
+@app.get("/favicon.ico")
+def favicon():
+    return send_from_directory(app.static_folder, "favicon.ico")
 
 
 @app.get("/privacy")

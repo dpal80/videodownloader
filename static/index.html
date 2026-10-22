@@ -102,6 +102,16 @@
     footer { color: var(--muted); font-size: .85rem; text-align: center; margin-top: 24px; }
     #progress-card { display: none; }
     .muted { color: var(--muted); font-size: .9rem; }
+    .info h2 { font-size: 1.1rem; margin: 0 0 10px; }
+    .info h2 + * { margin-top: 0; }
+    .info ol + h2 { margin-top: 20px; }
+    .steps { margin: 0; padding-left: 1.3em; }
+    .steps li { margin: 4px 0; }
+    .faq { margin: 0; }
+    .faq dt { font-weight: 600; margin-top: 12px; }
+    .faq dt:first-child { margin-top: 0; }
+    .faq dd { margin: 2px 0 0; color: var(--muted); font-size: .95rem; }
+    .langs { margin-top: 8px; font-size: .8rem; }
     .actions { display: flex; gap: 8px; margin-top: 12px; }
     @media (max-width: 480px) { .row, .url-row { flex-direction: column; } }
     /* Scelta della lingua in alto a destra */
@@ -187,6 +197,26 @@
   </div>
 
   <p class="muted" id="dir"></p>
+  <section class="card info" aria-labelledby="howto-title">
+    <h2 id="howto-title" data-i18n="howto.title">Come funziona</h2>
+    <ol class="steps">
+      <li data-i18n="howto.1">Copia il link del video da YouTube o Facebook e incollalo qui sopra.</li>
+      <li data-i18n="howto.2">Scegli il formato (MP4 o WebM per il video, MP3 o M4A per il solo audio) e la risoluzione.</li>
+      <li data-i18n="howto.3">Premi Scarica, conferma che il video rientra nei casi consentiti e il download parte.</li>
+    </ol>
+    <h2 data-i18n="faq.title">Domande frequenti</h2>
+    <dl class="faq">
+      <dt data-i18n="faq.q1">Grabby è gratuito?</dt>
+      <dd data-i18n="faq.a1">Sì, Grabby è gratuito e non serve registrarsi. Ti chiediamo solo il nome quando confermi l'avviso di responsabilità.</dd>
+      <dt data-i18n="faq.q2">Quali video posso scaricare?</dt>
+      <dd data-i18n="faq.a2">Solo i video che hai il diritto di salvare: quelli caricati da te, quelli con licenza libera (Creative Commons, pubblico dominio) e quelli per cui hai il permesso dell'autore. I dettagli sono nelle note legali.</dd>
+      <dt data-i18n="faq.q3">In quali formati posso salvare?</dt>
+      <dd data-i18n="faq.a3">Video in MP4 o WebM, fino al 4K se il video originale lo permette; solo audio in MP3 o M4A.</dd>
+      <dt data-i18n="faq.q4">Funziona con i video protetti o a pagamento?</dt>
+      <dd data-i18n="faq.a4">No. Grabby non aggira sistemi di protezione (DRM) e non scarica contenuti a pagamento o privati.</dd>
+    </dl>
+  </section>
+
   <details class="card legal">
     <summary data-i18n="legal.title">Note legali</summary>
     <p data-i18n="legal.p1">Grabby è uno strumento per uso personale e privato. Usalo solo per scaricare video di cui possiedi i diritti, video con licenza libera (es. Creative Commons, pubblico dominio) o video per cui hai ottenuto il permesso dell'autore.</p>
@@ -195,7 +225,11 @@
     <p><a href="/note-legali" data-i18n-href="legal" data-i18n="legal.more">Leggi l'analisi completa: Grabby e il diritto d'autore</a></p>
   </details>
 
-  <footer><span data-i18n="footer">Grabby · incolla, scegli, scarica.</span> · <a href="/note-legali" data-i18n-href="legal" data-i18n="footer.legal">Note legali</a><span id="privacy-link" hidden> · <a href="/privacy" data-i18n-href="privacy">Privacy</a></span></footer>
+  <footer><span data-i18n="footer">Grabby · incolla, scegli, scarica.</span> · <a href="/note-legali" data-i18n-href="legal" data-i18n="footer.legal">Note legali</a><span id="privacy-link" hidden> · <a href="/privacy" data-i18n-href="privacy">Privacy</a></span>
+    <nav class="langs" aria-label="Grabby in altre lingue" data-i18n-label="langs.label">
+      <a href="/it/" hreflang="it" lang="it">Italiano</a> · <a href="/en/" hreflang="en" lang="en">English</a> · <a href="/es/" hreflang="es" lang="es">Español</a> · <a href="/fr/" hreflang="fr" lang="fr">Français</a> · <a href="/de/" hreflang="de" lang="de">Deutsch</a> · <a href="/pt/" hreflang="pt" lang="pt">Português</a>
+    </nav>
+  </footer>
 </main>
 
 <dialog id="confirm" aria-labelledby="confirm-title">
@@ -408,6 +442,8 @@
   }
 
   document.addEventListener("grabby:lang", () => {
+    // Indirizzo della lingua scelta (/en/, /de/...), senza ricaricare la pagina.
+    if (/^\/([a-z]{2}\/)?$/.test(location.pathname)) history.replaceState(null, "", `/${i18n.lang}/`);
     renderLanguageMenu();
     translateDynamic();
     if ($("msg").dataset.key) showMsg(t($("msg").dataset.key), $("msg").dataset.kind);

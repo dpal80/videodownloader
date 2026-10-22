@@ -13,6 +13,8 @@ services:
     environment:
       TZ: "${TZ:-Europe/Rome}"
       GRABBY_MODE: online
+      # Indirizzo pubblico: serve a canonical, hreflang, sitemap e anteprime social.
+      GRABBY_URL_PUBBLICO: "https://${DOMINIO}"
       # Un proxy davanti (Caddy): serve per leggere l'IP vero dell'utente.
       GRABBY_PROXY_FIDATI: "1"
       GRABBY_LIMITE_ORARIO: "${GRABBY_LIMITE_ORARIO:-10}"
