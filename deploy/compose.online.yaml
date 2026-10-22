@@ -1,0 +1,48 @@
+# Grabby online: Caddy (HTTPS automatico con Let's Encrypt) davanti all'app.
+#
+#   cd deploy
+#   cp .env.example .env      # e compila DOMINIO ed EMAIL
+#   docker compose -f compose.online.yaml up -d --build
+#
+# NON pubblicare prima della revisione legale (vedi docs/per-avvocato.md).
+services:
+  grabby:
+    build: ..
+    image: grabby-video-downloader
+    restart: unless-stopped
+    environment:
+      GRABBY_MODE: online
+      # Un proxy davanti (Caddy): serve per leggere l'IP vero dell'utente.
+      GRABBY_PROXY_FIDATI: "1"
+      GRABBY_LIMITE_ORARIO: "${GRABBY_LIMITE_ORARIO:-10}"
+      GRABBY_CONSERVAZIONE_GIORNI: "${GRABBY_CONSERVAZIONE_GIORNI:-365}"
+      GRABBY_REGISTRO_DIR: /registro
+      DOWNLOAD_DIR: /tmp/grabby
+    volumes:
+      # Il registro dei download sopravvive a riavvii e aggiornamenti.
+      - registro:/registro
+    # Nessuna porta pubblicata: è raggiungibile solo da Caddy.
+    expose:
+      - "8000"
+
+  caddy:
+    image: caddy:2
+    restart: unless-stopped
+    depends_on:
+      - grabby
+    ports:
+      - "80:80"
+      - "443:443"
+      - "443:443/udp"
+    environment:
+      DOMINIO: "${DOMINIO:?imposta DOMINIO nel file .env}"
+      EMAIL: "${EMAIL:?imposta EMAIL nel file .env}"
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile:ro
+      - caddy_data:/data
+      - caddy_config:/config
+
+volumes:
+  registro:
+  caddy_data:
+  caddy_config:

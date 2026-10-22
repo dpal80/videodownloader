@@ -1,0 +1,114 @@
+# Grabby Video Downloader — dossier per la revisione legale
+
+Documento preparato per l'avvocato che deve valutare la pubblicazione online di
+Grabby. Riassume cosa fa il servizio, quali dati raccoglie, quali testi vanno
+rivisti e le domande aperte. **Grabby non verrà pubblicato prima di questa
+revisione.**
+
+Bozza del 22 ottobre 2026.
+
+## 1. Che cos'è Grabby
+
+Una pagina web che, dato il link di un video pubblico di **YouTube** o
+**Facebook**, ne scarica una copia (video MP4/WebM o solo audio MP3/M4A) usando
+il software open source [yt-dlp](https://github.com/yt-dlp/yt-dlp) e
+[ffmpeg](https://ffmpeg.org/).
+
+Esiste in due modalità:
+
+| | Locale (oggi) | Online (da valutare) |
+| --- | --- | --- |
+| Dove gira | Sul computer dell'utente | Su un server del titolare |
+| Chi fa la copia | Il computer dell'utente | **Il server del titolare** |
+| Dove finisce il file | Cartella Download dell'utente | Consegnato al browser, poi cancellato dal server (al più tardi dopo 1 ora) |
+| Dati raccolti | Registro locale sul computer | Registro sul server (vedi §3) |
+
+Il passaggio a online è il punto centrale: il titolare diventa il gestore del
+servizio che materialmente effettua la copia.
+
+## 2. Il percorso dell'utente online
+
+1. Incolla il link e, facoltativamente, preme **Analizza** per vedere titolo e
+   anteprima.
+2. Sceglie formato e risoluzione e preme **Scarica**.
+3. Compare un **avviso**: l'uso dei file scaricati è consentito solo nei casi
+   indicati in verde nelle note legali; chi continua si assume la piena
+   responsabilità legale. Pulsanti: *Annulla* / *Continua e scarica*.
+4. Il server scarica il video, lo consegna al browser e lo cancella.
+5. Ogni passaggio (richiesta, completamento o errore) finisce nel registro.
+
+Limiti anti-abuso: 10 download all'ora per IP (configurabile), massimo 2
+contemporanei, 60 analisi all'ora.
+
+## 3. Dati personali raccolti
+
+Registro CSV sul server, una riga per evento (richiesto / completato / errore):
+
+| Campo | Note |
+| --- | --- |
+| data_ora | |
+| nome | indicato dall'utente nel modulo |
+| ip | IP reale dell'utente (letto dietro il proxy HTTPS) |
+| browser | user-agent |
+| lingua | lingua del browser |
+| dichiarazione | versione del testo accettato (oggi v2) |
+| link, titolo, formato, risoluzione | il contenuto richiesto |
+| esito, file, errore | come è andata |
+
+- Nessun cookie di profilazione, nessun fingerprinting, nessuna registrazione.
+- Il proxy HTTPS (Caddy) non tiene log degli accessi.
+- Le righe più vecchie di **365 giorni** si cancellano in automatico
+  (`GRABBY_CONSERVAZIONE_GIORNI`).
+- Base giuridica ipotizzata: **legittimo interesse** (art. 6.1.f GDPR) per la
+  tutela in caso di contestazioni e per la sicurezza del servizio.
+
+## 4. Testi da rivedere
+
+| Testo | Dove si trova |
+| --- | --- |
+| Avviso / dichiarazione di responsabilità | `registro.py`, costante `DICHIARAZIONE` (mostrato al clic su Scarica) |
+| Note legali "Grabby e il diritto d'autore" | `static/note-legali.html`, pagina `/note-legali` |
+| Informativa privacy (bozza con campi `[DA COMPLETARE]`) | `static/privacy.html`, pagina `/privacy` |
+
+## 5. Rischi già individuati
+
+Approfonditi, con le fonti, nella pagina `/note-legali`.
+
+- **Termini di YouTube e di Meta**: vietano il download fuori dalle funzioni
+  ufficiali e la raccolta automatizzata. Conseguenze possibili: blocco degli IP
+  del server, diffide, segnalazioni al provider.
+- **Legge sul diritto d'autore (L. 633/1941)**: la copia privata (art.
+  71-sexies) ha limiti stretti; la riproduzione e la diffusione non autorizzate
+  sono illecite (art. 171 e seguenti, 174-ter per l'utente finale).
+- **Responsabilità del gestore**: in Germania (OLG Amburgo, 2024, caso
+  Uberspace) un provider che ospitava il sito di youtube-dl è stato ritenuto
+  responsabile per l'elusione di misure tecniche di protezione. Un servizio
+  online che fa la copia sul proprio server è esposto più di un'app locale.
+- **Efficacia della dichiarazione**: documenta la consapevolezza dell'utente, ma
+  non è chiaro quanto sposti la responsabilità verso il gestore.
+
+## 6. Domande per l'avvocato
+
+1. Il servizio online è compatibile con la legge italiana ed europea? A quali
+   condizioni (es. solo contenuti propri o con licenza libera)?
+2. Il testo della dichiarazione è adeguato? Va cambiato il meccanismo (es.
+   casella da spuntare, accettazione dei termini d'uso)?
+3. Servono **Termini d'uso** veri e propri? Chi li redige?
+4. Il legittimo interesse regge come base giuridica per IP e nome? 12 mesi di
+   conservazione sono proporzionati?
+5. Va fatta una valutazione d'impatto (DPIA) o basta il bilanciamento del
+   legittimo interesse?
+6. Serve un registro dei trattamenti (art. 30 GDPR) e una nomina del provider
+   come responsabile (art. 28)?
+7. Come gestire una diffida o una richiesta di rimozione (procedura,
+   tempi, contatto)?
+8. Ci sono rischi nel fatto che yt-dlp aggiri le protezioni tecniche di
+   YouTube (art. 102-quater e 171-ter L. 633/1941)?
+
+## 7. Da completare prima della pubblicazione
+
+- [ ] Dati del titolare e contatto privacy in `static/privacy.html`
+- [ ] Provider e paese dei server
+- [ ] Revisione e approvazione dei tre testi del §4
+- [ ] Termini d'uso, se richiesti
+- [ ] Dominio e certificato HTTPS (`deploy/`, vedi README)
