@@ -122,7 +122,7 @@ def get_info(url: str) -> dict:
 class Job:
     def __init__(self, url: str, fmt: str, resolution: str, requested_by: dict | None = None):
         self.id = uuid.uuid4().hex
-        # Chi ha chiesto il download (nome, utente, IP, browser): va nel registro.
+        # Chi ha chiesto il download (utente, IP, browser...): va nel registro.
         self.requested_by = requested_by or {}
         self.title = None
         self.url = url
@@ -240,6 +240,12 @@ class JobManager:
                 shutil.rmtree(tmp_dir, ignore_errors=True)
             job.finished_at = time.time()
             self._log(job, job.status)
+
+    def log_event(self, event: str, url: str, fmt: str, resolution: str, requested_by: dict) -> None:
+        """Annota nel registro una richiesta che non diventa un download (es. link bloccato)."""
+        job = Job(url, fmt, resolution, requested_by)
+        job.status = event
+        self._log(job, event)
 
     def _log(self, job: Job, event: str) -> None:
         if self.log is None:

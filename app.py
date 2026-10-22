@@ -11,7 +11,9 @@ from pathlib import Path
 from flask import Flask, abort, jsonify, redirect, request, send_file, send_from_directory
 from werkzeug.middleware.proxy_fix import ProxyFix
 
+import geo
 import seo
+from blocchi import Blocklist
 from downloader import FORMATS, RESOLUTIONS, JobManager, get_info, is_supported_url
 from registro import DICHIARAZIONE, DICHIARAZIONE_VERSIONE, DownloadLog, computer_user
 
@@ -32,6 +34,7 @@ if TRUSTED_PROXIES:
 
 # GDPR: online il registro si tiene per poco tempo (legittimo interesse).
 retention = os.environ.get("GRABBY_CONSERVAZIONE_GIORNI", "30" if ONLINE else "")
+blocklist = Blocklist()
 jobs = JobManager(log=DownloadLog(retention_days=int(retention) if retention else None))
 # Nel container (vedi Dockerfile) o online non c'è un Finder da aprire.
 CAN_OPEN_FOLDER = os.environ.get("GRABBY_IN_CONTAINER") != "1" and not ONLINE
@@ -107,6 +110,11 @@ def legal_notes():
     return page, {"Content-Type": "text/html; charset=utf-8"}
 
 
+@app.get("/segnalazioni")
+def reports():
+    return send_from_directory(app.static_folder, "segnalazioni.html")
+
+
 @app.get("/robots.txt")
 def robots():
     return seo.robots_txt(ONLINE), {"Content-Type": "text/plain; charset=utf-8"}
@@ -140,11 +148,26 @@ def options():
     )
 
 
+def _blocked():
+    return _error("blocked", "Questo video è stato bloccato dopo una segnalazione dei titolari dei diritti.", 451)
+
+
+def _client_port() -> str:
+    """Porta di origine della connessione: con l'IP e l'ora permette al provider
+    di risalire all'utente anche quando più persone condividono lo stesso IP."""
+    if TRUSTED_PROXIES:
+        # Caddy la passa in X-Client-Port (deploy/Caddyfile) e sovrascrive quella del client.
+        return request.headers.get("X-Client-Port", "")[:5]
+    return str(request.environ.get("REMOTE_PORT", ""))
+
+
 @app.post("/api/info")
 def info():
     url = (_json_body().get("url") or "").strip()
     if not is_supported_url(url):
         return _error("invalid_url", "Inserisci un link valido di YouTube o Facebook.", 400)
+    if blocklist.is_blocked(url):
+        return _blocked()
     if ONLINE and not info_limiter.allow(request.remote_addr):
         return _error("too_many", "Troppe richieste: riprova tra un po'.", 429)
     try:
@@ -159,14 +182,14 @@ def download():
     url = (body.get("url") or "").strip()
     fmt = body.get("format", "mp4")
     resolution = str(body.get("resolution", "best"))
-    user_name = " ".join(str(body.get("name") or "").split())[:80]
     ip = request.remote_addr
     if not is_supported_url(url):
         return _error("invalid_url", "Inserisci un link valido di YouTube o Facebook.", 400)
-    if not user_name:
-        return _error("name_required", "Scrivi il tuo nome prima di scaricare.", 400)
     if body.get("accepted") is not True:
         return _error("not_accepted", "Per scaricare devi accettare l'avviso di responsabilità.", 400)
+    if blocklist.is_blocked(url):
+        jobs.log_event("bloccato", url, fmt, resolution, _requester(body))
+        return _blocked()
     if ONLINE:
         jobs.sweep(FILE_MAX_AGE, delete_files=True)
         if jobs.active_count(ip) >= MAX_ACTIVE_PER_IP:
@@ -174,17 +197,26 @@ def download():
         if not download_limiter.allow(ip):
             return _error("rate_limited", "Hai raggiunto il limite di download per quest'ora.", 429)
     try:
-        job = jobs.start(url, fmt, resolution, requested_by={
-            "nome": user_name,
-            "utente_computer": "" if ONLINE else computer_user(),
-            "ip": ip,
-            "browser": request.headers.get("User-Agent", "")[:300],
-            "lingua": _log_language(body.get("lang"), request.headers.get("Accept-Language", "")[:100]),
-            "dichiarazione": f"accettata {DICHIARAZIONE_VERSIONE}",
-        })
+        job = jobs.start(url, fmt, resolution, requested_by=_requester(body))
     except ValueError as exc:
         return _error("invalid_option", str(exc), 400)
     return jsonify(_public(job.to_dict())), 202
+
+
+def _requester(body: dict) -> dict:
+    """Chi chiede il download, per il registro: solo dati che il browser invia
+    da solo (niente nome, niente fingerprinting)."""
+    ip = request.remote_addr
+    return {
+        "utente_computer": "" if ONLINE else computer_user(),
+        "ip": ip,
+        "porta": _client_port(),
+        **geo.lookup(ip),
+        "browser": request.headers.get("User-Agent", "")[:300],
+        "lingua": _log_language(body.get("lang"), request.headers.get("Accept-Language", "")[:100]),
+        "provenienza": str(body.get("ref") or "")[:300],
+        "dichiarazione": f"accettata {DICHIARAZIONE_VERSIONE}",
+    }
 
 
 def _log_language(page_lang, browser_lang: str) -> str:

@@ -1,0 +1,120 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grabby · Segnala un contenuto</title>
+<link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+<style>
+/* Colonna di lettura unica: semaforo degli scenari in testa, dettagli a seguire, fonti in fondo */
+:root {
+  --bg: #f4f6f8; --surface: #ffffff; --fg: #1f2933; --muted: #5b6672; --line: #dde2e8;
+  --accent: #2563eb; --accent-soft: #e6eefc;
+  --ok: #0f7a55; --ok-bg: #dcf3ea; --warn: #8a5a00; --warn-bg: #fbf0d6; --bad: #a3302a; --bad-bg: #f8e2e0;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161b21; --surface: #1f2933; --fg: #e8ecf0; --muted: #9aa5b1; --line: #323e4a;
+    --accent: #60a5fa; --accent-soft: #1c2b44;
+    --ok: #6ee7b7; --ok-bg: #173329; --warn: #f0c060; --warn-bg: #3a2f17; --bad: #f19a92; --bad-bg: #3d2120;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 32px 16px 64px;
+}
+main { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+h1, h2, h3 { line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(1.8rem, 5vw, 2.4rem); }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.05rem; }
+p { margin: 0; }
+a { color: var(--accent); text-underline-offset: 2px; }
+section { display: flex; flex-direction: column; gap: 14px; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.back { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; text-decoration: none; }
+.back img { width: 28px; height: 28px; }
+.eyebrow { font-family: ui-monospace, Menlo, monospace; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.lead { font-size: 1.1rem; }
+.meta { color: var(--muted); font-size: .9rem; }
+.disclaimer { border: 1px solid var(--line); background: var(--surface); padding: 14px 16px; border-radius: 8px; font-size: .93rem; color: var(--muted); }
+.disclaimer strong { color: var(--fg); }
+.verdict { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.verdict > div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.verdict .q { font-weight: 700; }
+.pill { display: inline-block; font-family: ui-monospace, Menlo, monospace; font-size: .72rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.ok { color: var(--ok); background: var(--ok-bg); }
+.pill.warn { color: var(--warn); background: var(--warn-bg); }
+.pill.bad { color: var(--bad); background: var(--bad-bg); }
+.scenarios { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.scenario { display: grid; grid-template-columns: 120px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.scenario > div { display: flex; flex-direction: column; gap: 4px; }
+.scenario .t { font-weight: 600; }
+.scenario .d { color: var(--muted); font-size: .95rem; }
+@media (max-width: 520px) { .scenario { grid-template-columns: 1fr; gap: 6px; } }
+blockquote { margin: 0; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--accent-soft); font-size: .95rem; border-radius: 0 6px 6px 0; }
+blockquote cite { display: block; font-style: normal; font-family: ui-monospace, Menlo, monospace; font-size: .75rem; color: var(--muted); margin-top: 4px; }
+ul.plain { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; }
+.ref { font-family: ui-monospace, Menlo, monospace; font-size: .85em; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: .93rem; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { font-family: ui-monospace, Menlo, monospace; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+tr:last-child td { border-bottom: 0; }
+.timeline { display: flex; flex-direction: column; border-left: 2px solid var(--line); margin-left: 6px; }
+.event { position: relative; padding: 0 0 18px 20px; display: flex; flex-direction: column; gap: 4px; }
+.event::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+.event .when { font-family: ui-monospace, Menlo, monospace; font-size: .78rem; color: var(--muted); }
+.checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.checklist li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; }
+.checklist li::before { content: "✓"; color: var(--ok); font-weight: 700; }
+.sources { font-size: .88rem; display: flex; flex-direction: column; gap: 6px; padding-left: 1.2em; margin: 0; }
+.sources li { word-break: break-word; }
+footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 16px; }
+.todo { background: var(--warn-bg); color: var(--warn); padding: 0 4px; border-radius: 4px; font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a class="back" href="/"><img src="/static/logo.svg" alt=""> Torna a Grabby</a>
+    <span class="eyebrow">Grabby Video Downloader · segnalazioni · bozza del 22 ottobre 2026</span>
+    <h1>Segnala un contenuto</h1>
+    <p class="lead">Sei titolare dei diritti su un video (o li rappresenti) e non vuoi che venga scaricato con Grabby? Scrivici: blocchiamo il link e lo annotiamo nel nostro registro.</p>
+    <div class="disclaimer"><strong>Bozza da far rivedere a un avvocato.</strong> Le parti evidenziate come <span class="todo">[DA COMPLETARE]</span> vanno compilate prima della pubblicazione.</div>
+  </header>
+
+  <section>
+    <h2>1. Come segnalare</h2>
+    <p>Scrivi a <span class="todo">[DA COMPLETARE: indirizzo e-mail dedicato alle segnalazioni]</span> indicando:</p>
+    <ul class="plain">
+      <li>il <strong>link del video</strong> (o dei video) da bloccare;</li>
+      <li>l'<strong>opera protetta</strong> e chi ne è titolare;</li>
+      <li>il tuo <strong>nome</strong>, i tuoi recapiti e, se agisci per conto di altri, a che titolo;</li>
+      <li>una dichiarazione che la segnalazione è fatta in buona fede e che le informazioni sono esatte.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>2. Cosa facciamo</h2>
+    <ul class="plain">
+      <li>Blocchiamo il link segnalato <span class="todo">[DA DEFINIRE: entro quanto tempo, per esempio 2 giorni lavorativi]</span>: da quel momento Grabby rifiuta di analizzarlo o scaricarlo, e mostra all'utente che il video è stato bloccato su segnalazione.</li>
+      <li>Rispondiamo confermando il blocco.</li>
+      <li>Annotiamo nel registro ogni tentativo successivo di scaricare il link bloccato.</li>
+      <li>Se ci chiedi informazioni sui download già avvenuti, le forniamo solo alle autorità o su ordine di un giudice, come previsto dall'<a href="/privacy">informativa privacy</a>.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>3. Segnalazioni infondate</h2>
+    <p>Se un link viene bloccato per errore, chi ha caricato il video può scriverci allo stesso indirizzo spiegando perché ha il diritto di diffonderlo. Valutiamo la richiesta e, se è fondata, rimuoviamo il blocco.</p>
+  </section>
+
+  <footer>Bozza del 22 ottobre 2026 · da far rivedere a un avvocato prima della pubblicazione · <a href="/note-legali">Note legali</a> · <a href="/privacy">Privacy</a></footer>
+</main>
+<script src="/static/i18n.js"></script>
+<script src="/static/pagine-legali.js"></script>
+</body>
+</html>

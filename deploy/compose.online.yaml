@@ -21,9 +21,14 @@ services:
       GRABBY_CONSERVAZIONE_GIORNI: "${GRABBY_CONSERVAZIONE_GIORNI:-30}"
       GRABBY_REGISTRO_DIR: /registro
       DOWNLOAD_DIR: /tmp/grabby
+      # Database di DB-IP per paese, città e provider (deploy/aggiorna-geoip.sh).
+      GRABBY_GEOIP_DIR: /geoip
+      # Elenco dei link bloccati dopo una segnalazione (vedi /segnalazioni).
+      GRABBY_BLOCCATI: /registro/contenuti-bloccati.txt
     volumes:
       # Il registro dei download sopravvive a riavvii e aggiornamenti.
       - registro:/registro
+      - ./geoip:/geoip:ro
     # Nessuna porta pubblicata: è raggiungibile solo da Caddy.
     expose:
       - "8000"

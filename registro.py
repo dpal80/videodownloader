@@ -11,23 +11,27 @@ from pathlib import Path
 
 # Avviso che l'utente accetta prima di scaricare: la versione finisce nel registro,
 # così si sa a quale dichiarazione si riferisce ogni riga.
-DICHIARAZIONE_VERSIONE = "v2"
+DICHIARAZIONE_VERSIONE = "v3"
 DICHIARAZIONE = (
     "L'utilizzo dei video e degli audio scaricati è permesso solo nei casi "
     "consentiti (in verde) nelle note legali: video tuoi, con licenza libera "
     "(Creative Commons, pubblico dominio) o con il permesso dell'autore. "
-    "Continuando e scaricando il video ti assumi la piena responsabilità legale "
-    "del suo utilizzo."
+    "Spuntando la casella dichiari che il video rientra in questi casi e, "
+    "continuando, ti assumi la piena responsabilità legale del suo utilizzo."
 )
 
 COLUMNS = [
     "data_ora",
     "evento",
     "utente_computer",
-    "nome",
     "ip",
+    "porta",
+    "paese",
+    "citta",
+    "provider",
     "browser",
     "lingua",
+    "provenienza",
     "dichiarazione",
     "link",
     "titolo",
@@ -78,6 +82,20 @@ class DownloadLog:
         self.retention_days = retention_days
         self._lock = threading.Lock()
         self._last_purge = None
+        self._checked_columns = False
+
+    def _migrate(self) -> None:
+        """Un registro con colonne di una versione precedente viene riscritto
+        con quelle attuali; i campi tolti (come il nome) non vengono copiati."""
+        with open(self.path, newline="", encoding="utf-8-sig") as f:
+            reader = csv.DictReader(f, delimiter=";")
+            if reader.fieldnames == COLUMNS:
+                return
+            rows = list(reader)
+        with open(self.path, "w", newline="", encoding="utf-8-sig") as f:
+            writer = csv.DictWriter(f, fieldnames=COLUMNS, delimiter=";", extrasaction="ignore")
+            writer.writeheader()
+            writer.writerows(rows)
 
     def purge(self, now: datetime | None = None) -> int:
         """Cancella le righe più vecchie di retention_days. Restituisce quante."""
@@ -105,6 +123,9 @@ class DownloadLog:
         with self._lock:
             self.path.parent.mkdir(parents=True, exist_ok=True)
             new_file = not self.path.exists() or self.path.stat().st_size == 0
+            if not new_file and not self._checked_columns:
+                self._migrate()
+            self._checked_columns = True
             # utf-8-sig: Excel riconosce le lettere accentate.
             with open(self.path, "a", newline="", encoding="utf-8-sig" if new_file else "utf-8") as f:
                 writer = csv.DictWriter(f, fieldnames=COLUMNS, delimiter=";")

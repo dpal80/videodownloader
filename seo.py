@@ -38,7 +38,8 @@ def t(lang: str, key: str, **values) -> str:
 
 
 def legal_links(lang: str) -> dict:
-    return {"legal": f"/note-legali?lang={lang}", "privacy": f"/privacy?lang={lang}"}
+    return {"legal": f"/note-legali?lang={lang}", "privacy": f"/privacy?lang={lang}",
+            "report": f"/segnalazioni?lang={lang}"}
 
 
 def _element(attribute: str):
@@ -141,4 +142,5 @@ def sitemap_xml() -> str:
             '<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:xhtml="http://www.w3.org/1999/xhtml">'
             + entry(lambda code: f"/{code}/")
             + entry(lambda code: f"/note-legali?lang={code}")
-            + f"\n  <url>\n    <loc>{PUBLIC_URL}/privacy</loc>\n  </url>\n</urlset>\n")
+            + f"\n  <url>\n    <loc>{PUBLIC_URL}/privacy</loc>\n  </url>"
+            + f"\n  <url>\n    <loc>{PUBLIC_URL}/segnalazioni</loc>\n  </url>\n</urlset>\n")

@@ -20,8 +20,8 @@ def read_log(path):
         return list(csv.DictReader(f, delimiter=";"))
 
 
-@pytest.mark.parametrize("field,value", [("accepted", False), ("accepted", None), ("name", "   ")])
-def test_download_requires_acceptance_and_name(client, field, value):
+@pytest.mark.parametrize("field,value", [("accepted", False), ("accepted", None), ("accepted", "true")])
+def test_download_requires_acceptance(client, field, value):
     res = client.post("/api/download", json=download_request(**{field: value}))
     assert res.status_code == 400
 
@@ -46,7 +46,8 @@ def test_download_is_logged(client, fake_ydl, monkeypatch, tmp_path):
     rows = read_log(log.path)
     assert [r["evento"] for r in rows] == ["richiesto", "completato"]
     done = rows[-1]
-    assert done["nome"] == "Mario Rossi"
+    assert "nome" not in done
+    assert done["porta"].isdigit() or done["porta"] == ""
     assert done["ip"] == "127.0.0.1"
     assert done["browser"] == "Browser di prova"
     assert done["lingua"] == "it-IT"
@@ -57,8 +58,8 @@ def test_download_is_logged(client, fake_ydl, monkeypatch, tmp_path):
 
 def test_log_neutralizes_spreadsheet_formulas(tmp_path):
     log = DownloadLog(tmp_path / "r.csv")
-    log.record({"nome": "=HYPERLINK(\"x\")", "link": "https://youtu.be/x"})
-    assert read_log(log.path)[0]["nome"].startswith("'=")
+    log.record({"titolo": "=HYPERLINK(\"x\")", "link": "https://youtu.be/x"})
+    assert read_log(log.path)[0]["titolo"].startswith("'=")
 
 
 def test_log_retention_purges_old_rows(tmp_path):
@@ -66,10 +67,10 @@ def test_log_retention_purges_old_rows(tmp_path):
     with open(log.path, "w", newline="", encoding="utf-8-sig") as f:
         w = csv.DictWriter(f, fieldnames=COLUMNS, delimiter=";")
         w.writeheader()
-        w.writerow({"data_ora": (datetime.now() - timedelta(days=45)).isoformat(timespec="seconds"), "nome": "vecchio"})
-        w.writerow({"data_ora": (datetime.now() - timedelta(days=5)).isoformat(timespec="seconds"), "nome": "recente"})
+        w.writerow({"data_ora": (datetime.now() - timedelta(days=45)).isoformat(timespec="seconds"), "titolo": "vecchio"})
+        w.writerow({"data_ora": (datetime.now() - timedelta(days=5)).isoformat(timespec="seconds"), "titolo": "recente"})
     assert log.purge() == 1
-    assert [r["nome"] for r in read_log(log.path)] == ["recente"]
+    assert [r["titolo"] for r in read_log(log.path)] == ["recente"]
 
 
 @pytest.fixture
@@ -130,3 +131,58 @@ def test_log_time_has_timezone(tmp_path):
     log = DownloadLog(tmp_path / "r.csv", retention_days=30)
     log.record({"nome": "x"})
     assert datetime.fromisoformat(read_log(log.path)[0]["data_ora"]).tzinfo is not None
+
+
+def test_old_log_is_migrated_without_name(tmp_path):
+    path = tmp_path / "r.csv"
+    old_columns = ["data_ora", "evento", "nome", "ip", "link"]
+    with open(path, "w", newline="", encoding="utf-8-sig") as f:
+        w = csv.DictWriter(f, fieldnames=old_columns, delimiter=";")
+        w.writeheader()
+        w.writerow({"data_ora": "2026-10-22T10:00:00+02:00", "evento": "completato", "nome": "Mario", "ip": "1.2.3.4",
+                    "link": "https://youtu.be/a"})
+    DownloadLog(path).record({"evento": "richiesto", "ip": "5.6.7.8", "link": "https://youtu.be/b"})
+    with open(path, newline="", encoding="utf-8-sig") as f:
+        reader = csv.DictReader(f, delimiter=";")
+        rows = list(reader)
+    assert reader.fieldnames == COLUMNS
+    assert [r["ip"] for r in rows] == ["1.2.3.4", "5.6.7.8"]
+
+
+def test_client_port_from_trusted_proxy(client, fake_ydl, monkeypatch, tmp_path):
+    log = DownloadLog(tmp_path / "registro.csv")
+    monkeypatch.setattr(app_module, "jobs", downloader.JobManager(tmp_path / "out", log=log))
+    monkeypatch.setattr(app_module, "TRUSTED_PROXIES", 1)
+    res = client.post("/api/download", json=download_request(ref="https://www.google.com/"),
+                      headers={"X-Client-Port": "51234"})
+    wait_for(client, res.get_json()["id"])
+    row = read_log(log.path)[-1]
+    assert row["porta"] == "51234"
+    assert row["provenienza"] == "https://www.google.com/"
+
+
+def test_blocked_link_is_refused_and_logged(client, fake_ydl, monkeypatch, tmp_path):
+    from blocchi import Blocklist
+
+    blocked = tmp_path / "bloccati.txt"
+    blocked.write_text("# segnalazione del 22/10/2026\ndQw4w9WgXcQ\n", encoding="utf-8")
+    log = DownloadLog(tmp_path / "registro.csv")
+    monkeypatch.setattr(app_module, "blocklist", Blocklist(blocked))
+    monkeypatch.setattr(app_module, "jobs", downloader.JobManager(tmp_path / "out", log=log))
+
+    for url in ("https://www.youtube.com/watch?v=dQw4w9WgXcQ", "https://youtu.be/dQw4w9WgXcQ"):
+        res = client.post("/api/download", json=download_request(url=url))
+        assert res.status_code == 451
+        assert res.get_json()["code"] == "blocked"
+    assert client.post("/api/info", json={"url": "https://youtu.be/dQw4w9WgXcQ"}).status_code == 451
+    assert [r["evento"] for r in read_log(log.path)] == ["bloccato", "bloccato"]
+    # Gli altri video si scaricano normalmente.
+    assert client.post("/api/download", json=download_request()).status_code == 202
+
+
+def test_geo_lookup_without_database():
+    import geo
+
+    assert geo.lookup("8.8.8.8") == {"paese": "", "citta": "", "provider": ""} or geo.lookup("8.8.8.8")["paese"]
+    assert geo.lookup("127.0.0.1") == {"paese": "", "citta": "", "provider": ""}
+    assert geo.lookup("non-un-ip") == {"paese": "", "citta": "", "provider": ""}

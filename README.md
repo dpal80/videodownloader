@@ -250,14 +250,36 @@ Non usare insieme container e app Grabby: occupano la stessa porta 8000.
 ## Avviso prima di ogni download e registro
 
 Quando premi **Scarica** si apre una finestra che ricorda i casi in cui l'uso
-dei video è consentito (quelli in verde nelle [note legali](static/note-legali.html))
-e chiede il tuo nome. Continuando, ti assumi la piena responsabilità legale
-dell'uso del video.
+dei video è consentito (quelli in verde nelle [note legali](static/note-legali.html)).
+Per continuare devi spuntare la casella "Dichiaro che il video rientra nei
+casi consentiti e mi assumo la piena responsabilità del suo utilizzo".
 
 Ogni download viene annotato in `registro-download.csv` (si apre con Excel),
 nella cartella `Documenti/Grabby` (o in `GRABBY_REGISTRO_DIR`): data e ora,
-evento, nome, utente del computer, IP, browser, lingua, versione dell'avviso
-accettato, link, titolo, formato, esito e file.
+evento, utente del computer, IP e porta, paese, città e provider, browser,
+lingua, pagina di provenienza, versione dell'avviso accettato, link, titolo,
+formato, esito e file. Il nome non viene più chiesto: un registro creato con
+una versione precedente viene convertito alle nuove colonne, senza il nome.
+
+Paese, città e provider si ricavano dall'IP con i database gratuiti di
+[DB-IP](https://db-ip.com) (licenza CC BY 4.0), salvati sul server: lancia
+`deploy/aggiorna-geoip.sh` una volta al mese. Senza quei file i tre campi
+restano vuoti.
+
+### Segnalazioni e link bloccati
+
+La pagina `/segnalazioni` spiega ai titolari dei diritti come chiedere il
+blocco di un video. Per bloccarlo aggiungi una riga al file
+`contenuti-bloccati.txt` nella cartella del registro (o in `GRABBY_BLOCCATI`):
+l'ID del video YouTube (es. `dQw4w9WgXcQ`) oppure un pezzo dell'indirizzo
+(es. `facebook.com/watch/?v=123`). Le righe che iniziano con `#` sono note.
+Grabby rilegge il file da solo, rifiuta quei link e annota i tentativi nel
+registro. Online, sul server:
+
+```bash
+docker compose -f compose.online.yaml exec grabby \
+  sh -c 'echo "# segnalazione del 22/10/2026" >> /registro/contenuti-bloccati.txt; echo dQw4w9WgXcQ >> /registro/contenuti-bloccati.txt'
+```
 
 ## 🌐 Pubblicazione online (non ancora attiva)
 
@@ -278,3 +300,5 @@ HTTPS in [`deploy/`](deploy/), informativa privacy in
 | `GRABBY_LIMITE_ORARIO`        | `10`             | Download all'ora per indirizzo IP           |
 | `GRABBY_CONSERVAZIONE_GIORNI` | `30`             | Giorni dopo cui il registro si cancella     |
 | `GRABBY_REGISTRO_DIR`         | `~/Documents/Grabby` | Cartella del registro                  |
+| `GRABBY_GEOIP_DIR`            | `geoip/`         | Database DB-IP per paese, città e provider  |
+| `GRABBY_BLOCCATI`             | cartella del registro | File con i link bloccati               |

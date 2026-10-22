@@ -33,7 +33,10 @@ servizio che materialmente effettua la copia.
 2. Sceglie formato e risoluzione e preme **Scarica**.
 3. Compare un **avviso**: l'uso dei file scaricati è consentito solo nei casi
    indicati in verde nelle note legali; chi continua si assume la piena
-   responsabilità legale. Pulsanti: *Annulla* / *Continua e scarica*.
+   responsabilità legale. L'utente deve spuntare la casella "Dichiaro che il
+   video rientra nei casi consentiti e mi assumo la piena responsabilità del
+   suo utilizzo" (dalla versione v3 non si chiede più il nome). Pulsanti:
+   *Annulla* / *Continua e scarica*.
 4. Il server scarica il video, lo consegna al browser e lo cancella.
 5. Ogni passaggio (richiesta, completamento o errore) finisce nel registro.
 
@@ -46,14 +49,20 @@ Registro CSV sul server, una riga per evento (richiesto / completato / errore):
 
 | Campo | Note |
 | --- | --- |
-| data_ora | |
-| nome | indicato dall'utente nel modulo |
-| ip | IP reale dell'utente (letto dietro il proxy HTTPS) |
+| data_ora | con fuso orario |
+| ip, porta | IP reale dell'utente e porta di origine (letti dietro il proxy HTTPS). Con IP, porta e ora il provider può risalire all'abbonato anche con IP condivisi (CGNAT) |
+| paese, citta, provider | stimati dall'IP con i database DB-IP installati sul server, nessun invio a terzi |
 | browser | user-agent |
-| lingua | lingua del browser |
-| dichiarazione | versione del testo accettato (oggi v2) |
+| lingua | lingua della pagina e del browser |
+| provenienza | pagina da cui l'utente è arrivato (referrer) |
+| dichiarazione | versione del testo accettato con la casella (oggi v3) |
 | link, titolo, formato, risoluzione | il contenuto richiesto |
-| esito, file, errore | come è andata |
+| esito, file, errore | come è andata; "bloccato" se il link era stato segnalato |
+
+Dalla v3 il **nome non viene più chiesto**: non era verificabile e quindi
+difficile da giustificare come dato necessario. Si registrano solo dati che il
+browser invia da solo; niente lettura di informazioni dal dispositivo con
+JavaScript, quindi nessun banner di consenso.
 
 - Nessun cookie di profilazione, nessun fingerprinting, nessuna registrazione.
 - Il proxy HTTPS (Caddy) non tiene log degli accessi.
@@ -62,6 +71,13 @@ Registro CSV sul server, una riga per evento (richiesto / completato / errore):
 - Base giuridica ipotizzata: **legittimo interesse** (art. 6.1.f GDPR) per la
   tutela in caso di contestazioni e per la sicurezza del servizio.
 
+## 3-bis. Procedura di segnalazione e rimozione
+
+Pagina `/segnalazioni`: i titolari dei diritti segnalano un link via e-mail; il
+link viene aggiunto all'elenco dei contenuti bloccati e da quel momento Grabby
+rifiuta di analizzarlo o scaricarlo (risposta HTTP 451) e annota ogni tentativo
+nel registro. Da completare: indirizzo e-mail e tempi di risposta.
+
 ## 4. Testi da rivedere
 
 | Testo | Dove si trova |
@@ -69,6 +85,7 @@ Registro CSV sul server, una riga per evento (richiesto / completato / errore):
 | Avviso / dichiarazione di responsabilità | `registro.py`, costante `DICHIARAZIONE` (mostrato al clic su Scarica) |
 | Note legali "Grabby e il diritto d'autore" | `static/note-legali.html`, pagina `/note-legali` |
 | Informativa privacy (bozza con campi `[DA COMPLETARE]`) | `static/privacy.html`, pagina `/privacy` |
+| Procedura di segnalazione (bozza) | `static/segnalazioni.html`, pagina `/segnalazioni` |
 
 ## 5. Rischi già individuati
 
@@ -94,14 +111,14 @@ Approfonditi, con le fonti, nella pagina `/note-legali`.
 2. Il testo della dichiarazione è adeguato? Va cambiato il meccanismo (es.
    casella da spuntare, accettazione dei termini d'uso)?
 3. Servono **Termini d'uso** veri e propri? Chi li redige?
-4. Il legittimo interesse regge come base giuridica per IP e nome? 30 giorni di
-   conservazione sono proporzionati?
+4. Il legittimo interesse regge come base giuridica per IP, porta, paese,
+   città e provider? 30 giorni di conservazione sono proporzionati?
 5. Va fatta una valutazione d'impatto (DPIA) o basta il bilanciamento del
    legittimo interesse?
 6. Serve un registro dei trattamenti (art. 30 GDPR) e una nomina del provider
    come responsabile (art. 28)?
-7. Come gestire una diffida o una richiesta di rimozione (procedura,
-   tempi, contatto)?
+7. La procedura di segnalazione e blocco (§3-bis, pagina `/segnalazioni`) è
+   adeguata? Quali tempi di risposta indicare?
 8. Ci sono rischi nel fatto che yt-dlp aggiri le protezioni tecniche di
    YouTube (art. 102-quater e 171-ter L. 633/1941)?
 
