@@ -10,6 +10,10 @@ services:
     environment:
       # Mostrata nella pagina al posto di /downloads.
       DOWNLOAD_DIR_LABEL: "${DOWNLOAD_DIR:-~/Downloads}"
+      # Registro dei download sul Mac, con il nome dell'utente del Mac.
+      GRABBY_REGISTRO_DIR: /registro
+      GRABBY_UTENTE_COMPUTER: "${USER:-}"
     volumes:
       - "${DOWNLOAD_DIR:-~/Downloads}:/downloads"
+      - "~/Documents/Grabby:/registro"
     restart: unless-stopped

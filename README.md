@@ -225,3 +225,35 @@ docker compose down
   `docker compose build --no-cache && docker compose up -d`.
 
 Non usare insieme container e app Grabby: occupano la stessa porta 8000.
+
+## Avviso prima di ogni download e registro
+
+Quando premi **Scarica** si apre una finestra che ricorda i casi in cui l'uso
+dei video è consentito (quelli in verde nelle [note legali](static/note-legali.html))
+e chiede il tuo nome. Continuando, ti assumi la piena responsabilità legale
+dell'uso del video.
+
+Ogni download viene annotato in `registro-download.csv` (si apre con Excel),
+nella cartella `Documenti/Grabby` (o in `GRABBY_REGISTRO_DIR`): data e ora,
+evento, nome, utente del computer, IP, browser, lingua, versione dell'avviso
+accettato, link, titolo, formato, esito e file.
+
+## 🌐 Pubblicazione online (non ancora attiva)
+
+Grabby ha una **modalità online** (`GRABBY_MODE=online`) pensata per un server:
+il file viene consegnato al browser e poi cancellato, ci sono limiti di
+download per IP e il registro tiene i dati per 30 giorni. Configurazione con
+HTTPS in [`deploy/`](deploy/), informativa privacy in
+[`static/privacy.html`](static/privacy.html).
+
+> **Da non pubblicare prima del parere di un avvocato.** Un servizio online
+> che scarica per conto di altri è lo scenario a rischio legale più alto.
+> Il riepilogo da portargli è in [`docs/per-avvocato.md`](docs/per-avvocato.md).
+
+| Variabile                     | Default (online) | A cosa serve                               |
+| ----------------------------- | ---------------- | ------------------------------------------ |
+| `GRABBY_MODE`                 | `local`          | `online` per la versione su server          |
+| `GRABBY_PROXY_FIDATI`         | `0`              | Proxy davanti a Grabby (es. Caddy = `1`)    |
+| `GRABBY_LIMITE_ORARIO`        | `10`             | Download all'ora per indirizzo IP           |
+| `GRABBY_CONSERVAZIONE_GIORNI` | `30`             | Giorni dopo cui il registro si cancella     |
+| `GRABBY_REGISTRO_DIR`         | `~/Documents/Grabby` | Cartella del registro                  |

@@ -57,7 +57,7 @@ Registro CSV sul server, una riga per evento (richiesto / completato / errore):
 
 - Nessun cookie di profilazione, nessun fingerprinting, nessuna registrazione.
 - Il proxy HTTPS (Caddy) non tiene log degli accessi.
-- Le righe più vecchie di **365 giorni** si cancellano in automatico
+- Le righe più vecchie di **30 giorni** (configurabile con `GRABBY_CONSERVAZIONE_GIORNI`) si cancellano in automatico
   (`GRABBY_CONSERVAZIONE_GIORNI`).
 - Base giuridica ipotizzata: **legittimo interesse** (art. 6.1.f GDPR) per la
   tutela in caso di contestazioni e per la sicurezza del servizio.
@@ -94,7 +94,7 @@ Approfonditi, con le fonti, nella pagina `/note-legali`.
 2. Il testo della dichiarazione è adeguato? Va cambiato il meccanismo (es.
    casella da spuntare, accettazione dei termini d'uso)?
 3. Servono **Termini d'uso** veri e propri? Chi li redige?
-4. Il legittimo interesse regge come base giuridica per IP e nome? 12 mesi di
+4. Il legittimo interesse regge come base giuridica per IP e nome? 30 giorni di
    conservazione sono proporzionati?
 5. Va fatta una valutazione d'impatto (DPIA) o basta il bilanciamento del
    legittimo interesse?

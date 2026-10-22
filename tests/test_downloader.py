@@ -4,6 +4,7 @@ import pytest
 
 import downloader
 from app import app
+from tests.helpers import download_request, wait_for
 
 
 @pytest.mark.parametrize(
@@ -84,36 +85,11 @@ def test_download_rejects_bad_format(client):
     assert res.status_code == 400
 
 
-def test_download_job_lifecycle(client, monkeypatch, tmp_path):
-    class FakeYDL:
-        def __init__(self, opts):
-            self.opts = opts
-
-        def __enter__(self):
-            return self
-
-        def __exit__(self, *a):
-            return False
-
-        def extract_info(self, url, download):
-            for hook in self.opts["progress_hooks"]:
-                hook({"status": "downloading", "downloaded_bytes": 50, "total_bytes": 100})
-                hook({"status": "finished"})
-            out = Path(self.opts["outtmpl"]).parent / "video [x].mp4"
-            out.write_bytes(b"data")
-            return {"requested_downloads": [{"filepath": str(out)}]}
-
-    monkeypatch.setattr(downloader.yt_dlp, "YoutubeDL", FakeYDL)
+def test_download_job_lifecycle(client, fake_ydl, monkeypatch, tmp_path):
     monkeypatch.setattr("app.jobs", downloader.JobManager(tmp_path))
 
-    job = client.post("/api/download", json={"url": "https://youtu.be/x", "format": "mp4", "resolution": "720"}).get_json()
-    import time
-
-    for _ in range(50):
-        state = client.get(f"/api/progress/{job['id']}").get_json()
-        if state["status"] in ("completato", "errore"):
-            break
-        time.sleep(0.05)
+    job = client.post("/api/download", json=download_request()).get_json()
+    state = wait_for(client, job["id"])
     assert state["status"] == "completato"
     assert state["filename"] == "video [x].mp4"
     assert state["percent"] == 100.0

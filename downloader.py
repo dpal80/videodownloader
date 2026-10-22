@@ -4,6 +4,7 @@ import os
 import shutil
 import tempfile
 import threading
+import time
 import uuid
 from pathlib import Path
 from urllib.parse import urlparse
@@ -119,8 +120,11 @@ def get_info(url: str) -> dict:
 
 
 class Job:
-    def __init__(self, url: str, fmt: str, resolution: str):
+    def __init__(self, url: str, fmt: str, resolution: str, requested_by: dict | None = None):
         self.id = uuid.uuid4().hex
+        # Chi ha chiesto il download (nome, utente, IP, browser): va nel registro.
+        self.requested_by = requested_by or {}
+        self.title = None
         self.url = url
         self.fmt = fmt
         self.resolution = resolution
@@ -130,6 +134,7 @@ class Job:
         self.eta = None
         self.filepath = None
         self.error = None
+        self.finished_at = None
 
     def to_dict(self) -> dict:
         return {
@@ -145,8 +150,9 @@ class Job:
 
 
 class JobManager:
-    def __init__(self, output_dir: Path | None = None):
+    def __init__(self, output_dir: Path | None = None, log=None):
         self.output_dir = output_dir or default_download_dir()
+        self.log = log  # registro.DownloadLog, se presente
         self._jobs: dict[str, Job] = {}
         self._lock = threading.Lock()
 
@@ -154,11 +160,39 @@ class JobManager:
         with self._lock:
             return self._jobs.get(job_id)
 
-    def start(self, url: str, fmt: str, resolution: str) -> Job:
+    def forget(self, job_id: str) -> None:
+        with self._lock:
+            self._jobs.pop(job_id, None)
+
+    def active_count(self, ip: str) -> int:
+        """Download ancora in corso chiesti da questo indirizzo IP."""
+        with self._lock:
+            return sum(
+                1 for j in self._jobs.values()
+                if j.finished_at is None and j.requested_by.get("ip") == ip
+            )
+
+    def sweep(self, max_age_seconds: float, delete_files: bool = False) -> None:
+        """Dimentica i download finiti da più di max_age_seconds.
+
+        Online i file restano sul server solo finché l'utente li scarica:
+        con delete_files=True vengono cancellati anche quelli mai ritirati."""
+        now = time.time()
+        with self._lock:
+            old = [j for j in self._jobs.values() if j.finished_at and now - j.finished_at > max_age_seconds]
+            for j in old:
+                del self._jobs[j.id]
+        if delete_files:
+            for j in old:
+                if j.filepath:
+                    Path(j.filepath).unlink(missing_ok=True)
+
+    def start(self, url: str, fmt: str, resolution: str, requested_by: dict | None = None) -> Job:
         build_ydl_options(fmt, resolution, self.output_dir)  # valida i parametri
-        job = Job(url, fmt, resolution)
+        job = Job(url, fmt, resolution, requested_by)
         with self._lock:
             self._jobs[job.id] = job
+        self._log(job, "richiesto")
         threading.Thread(target=self._run, args=(job,), daemon=True).start()
         return job
 
@@ -188,6 +222,7 @@ class JobManager:
             opts.update(progress_hooks=[progress_hook], postprocessor_hooks=[postprocessor_hook])
             with yt_dlp.YoutubeDL(opts) as ydl:
                 info = ydl.extract_info(job.url, download=True)
+            job.title = info.get("title")
             downloads = info.get("requested_downloads") or []
             produced = Path(downloads[-1]["filepath"]) if downloads else None
             if produced is None or not produced.exists():
@@ -203,6 +238,26 @@ class JobManager:
         finally:
             if tmp_dir is not None:
                 shutil.rmtree(tmp_dir, ignore_errors=True)
+            job.finished_at = time.time()
+            self._log(job, job.status)
+
+    def _log(self, job: Job, event: str) -> None:
+        if self.log is None:
+            return
+        try:
+            self.log.record({
+                **job.requested_by,
+                "evento": event,
+                "link": job.url,
+                "titolo": job.title,
+                "formato": job.fmt,
+                "risoluzione": job.resolution,
+                "esito": job.status,
+                "file": Path(job.filepath).name if job.filepath else "",
+                "errore": job.error,
+            })
+        except OSError:
+            pass  # il registro non deve mai bloccare un download
 
 
 def _unique_path(path: Path) -> Path:

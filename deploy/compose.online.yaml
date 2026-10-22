@@ -15,7 +15,7 @@ services:
       # Un proxy davanti (Caddy): serve per leggere l'IP vero dell'utente.
       GRABBY_PROXY_FIDATI: "1"
       GRABBY_LIMITE_ORARIO: "${GRABBY_LIMITE_ORARIO:-10}"
-      GRABBY_CONSERVAZIONE_GIORNI: "${GRABBY_CONSERVAZIONE_GIORNI:-365}"
+      GRABBY_CONSERVAZIONE_GIORNI: "${GRABBY_CONSERVAZIONE_GIORNI:-30}"
       GRABBY_REGISTRO_DIR: /registro
       DOWNLOAD_DIR: /tmp/grabby
     volumes:

@@ -56,6 +56,21 @@
     .legal summary { cursor: pointer; font-weight: 600; }
     .legal p { margin: 10px 0 0; font-size: .9rem; color: var(--muted); }
     .notice { margin: 10px 0 0; font-size: .82rem; color: var(--muted); text-align: center; }
+    /* Finestra di conferma prima del download */
+    dialog#confirm {
+      max-width: 520px; width: calc(100% - 32px); border: 1px solid var(--border); border-radius: 14px;
+      padding: 22px; background: var(--card); color: var(--text); box-shadow: 0 20px 60px rgba(0, 0, 0, .45);
+    }
+    dialog#confirm::backdrop { background: rgba(10, 15, 20, .6); -webkit-backdrop-filter: blur(4px); backdrop-filter: blur(4px); }
+    dialog#confirm h2 { margin: 0 0 10px; font-size: 1.25rem; }
+    dialog#confirm p { margin: 0 0 12px; font-size: .95rem; }
+    .allowed { list-style: none; margin: 0 0 12px; padding: 12px 14px; border-radius: 10px; background: color-mix(in srgb, var(--brand-green) 14%, transparent); border: 1px solid color-mix(in srgb, var(--brand-green) 45%, transparent); }
+    .allowed li { padding-left: 24px; position: relative; margin: 4px 0; font-size: .93rem; }
+    .allowed li::before { content: "✓"; position: absolute; left: 4px; color: var(--ok); font-weight: 700; }
+    .responsibility { font-weight: 600; }
+    .privacy-note { font-size: .82rem; color: var(--muted); }
+    .dialog-actions { display: flex; gap: 8px; justify-content: flex-end; margin-top: 16px; flex-wrap: wrap; }
+    .dialog-actions .primary { width: auto; margin-top: 0; padding: 10px 16px; }
     label { display: block; font-weight: 600; font-size: .9rem; margin-bottom: 6px; }
     input, select, button { font: inherit; }
     input, select {
@@ -146,8 +161,28 @@
     <p><a href="/note-legali">Leggi l'analisi completa: Grabby e il diritto d'autore</a></p>
   </details>
 
-  <footer>Grabby · incolla, scegli, scarica. · <a href="/note-legali">Note legali</a></footer>
+  <footer>Grabby · incolla, scegli, scarica. · <a href="/note-legali">Note legali</a><span id="privacy-link" hidden> · <a href="/privacy">Privacy</a></span></footer>
 </main>
+
+<dialog id="confirm" aria-labelledby="confirm-title">
+  <form method="dialog" id="confirm-form">
+    <h2 id="confirm-title">Prima di scaricare</h2>
+    <p>L'utilizzo dei video e degli audio scaricati è permesso <strong>solo nei casi consentiti</strong>, indicati in verde nelle <a href="/note-legali#casi-consentiti" target="_blank" rel="noopener">note legali</a>:</p>
+    <ul class="allowed">
+      <li>video che hai caricato tu</li>
+      <li>video con licenza libera (Creative Commons, pubblico dominio)</li>
+      <li>video per cui hai il permesso dell'autore</li>
+    </ul>
+    <p class="responsibility">Se continui e scarichi il video, ti assumi la piena responsabilità legale del suo utilizzo.</p>
+    <label for="user-name">Il tuo nome</label>
+    <input id="user-name" type="text" autocomplete="name" maxlength="80" required placeholder="Nome e cognome">
+    <p class="privacy-note" id="privacy-note">Il download viene annotato nel registro di Grabby con il tuo nome, data e ora e il link del video.</p>
+    <div class="dialog-actions">
+      <button type="button" class="secondary" id="confirm-cancel">Annulla</button>
+      <button type="submit" class="primary" id="confirm-ok">Continua e scarica</button>
+    </div>
+  </form>
+</dialog>
 
 <script>
   const $ = (id) => document.getElementById(id);
@@ -194,6 +229,7 @@
   let formats = [];
   let allResolutions = [];
   let canOpenFolder = true;
+  let online = false;
   let availableHeights = null;
 
   const resLabel = (r) => ({ best: "Migliore disponibile", 2160: "2160p (4K)", 1440: "1440p (2K)" }[r] || r + "p");
@@ -251,8 +287,13 @@
     allResolutions = opts.resolutions;
     formats.forEach((f) => $("format").add(new Option(f.label, f.value)));
     fillResolutions();
-    $("dir").textContent = "I file vengono salvati in: " + opts.download_dir;
+    if (opts.download_dir) $("dir").textContent = "I file vengono salvati in: " + opts.download_dir;
     canOpenFolder = opts.can_open_folder !== false;
+    online = opts.online === true;
+    if (online) {
+      $("privacy-link").hidden = false;
+      $("privacy-note").innerHTML = 'Per tutelare il servizio registriamo il tuo nome, l\'indirizzo IP, il browser, la lingua, data e ora e il link del video. Dettagli nell\'<a href="/privacy" target="_blank" rel="noopener">informativa privacy</a>.';
+    }
   }
 
   $("format").addEventListener("change", fillResolutions);
@@ -281,13 +322,39 @@
     }
   });
 
-  $("download").addEventListener("click", async () => {
+  // Il nome viene ricordato dal browser per le volte successive.
+  function savedName() {
+    try { return localStorage.getItem("grabby-name") || ""; } catch (e) { return ""; }
+  }
+  function saveName(name) {
+    try { localStorage.setItem("grabby-name", name); } catch (e) { /* non indispensabile */ }
+  }
+
+  $("download").addEventListener("click", () => {
     const url = $("url").value.trim();
     if (!url) return showMsg("Incolla prima un link.", "error");
-    $("download").disabled = true;
     showMsg("");
+    $("user-name").value = savedName();
+    $("confirm").showModal();
+    $("user-name").focus();
+  });
+
+  $("confirm-cancel").addEventListener("click", () => $("confirm").close());
+
+  $("confirm-form").addEventListener("submit", (e) => {
+    const name = $("user-name").value.trim();
+    if (!name) { e.preventDefault(); $("user-name").focus(); return; }
+    saveName(name);
+    startDownload(name);
+  });
+
+  async function startDownload(name) {
+    const url = $("url").value.trim();
+    $("download").disabled = true;
     try {
-      const job = await api("/api/download", { url, format: $("format").value, resolution: $("resolution").value });
+      const job = await api("/api/download", {
+        url, format: $("format").value, resolution: $("resolution").value, name, accepted: true,
+      });
       $("progress-card").style.display = "block";
       $("open").style.display = "none";
       poll(job.id);
@@ -295,7 +362,7 @@
       showMsg(e.message, "error");
       $("download").disabled = false;
     }
-  });
+  }
 
   $("open").addEventListener("click", () => api("/api/open-folder", {}));
 
@@ -308,6 +375,11 @@
       if (j.status === "completato") {
         $("status").textContent = "✅ Download completato!";
         $("details").textContent = j.filename || "";
+        if (online) {
+          // Online il file è sul server: lo consegna al browser (e poi viene cancellato).
+          $("details").textContent = (j.filename || "") + " · il download parte dal browser";
+          window.location.href = "/api/file/" + j.id;
+        }
         if (canOpenFolder) $("open").style.display = "inline-block";
         $("download").disabled = false;
         return;
