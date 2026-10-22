@@ -29,11 +29,21 @@ Se non hai ancora [Homebrew](https://brew.sh), aprilo dal Terminale con:
 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
 ```
 
-Poi installa Python, ffmpeg e git:
+Poi installa ffmpeg e git:
 
 ```bash
-brew install python ffmpeg git
+brew install ffmpeg git
 ```
+
+Serve anche **Python 3.10 o più recente**. Il modo più semplice, senza
+password di amministratore, è installare [uv](https://docs.astral.sh/uv/):
+`avvia.sh` lo usa da solo per scaricare Python 3.12.
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+In alternativa va bene anche `brew install python`.
 
 ### 2. Scarica il progetto
 

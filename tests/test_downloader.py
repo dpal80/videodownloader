@@ -65,7 +65,7 @@ def client():
 def test_index_served(client):
     res = client.get("/")
     assert res.status_code == 200
-    assert b"Video Downloader" in res.data
+    assert b"Grabby Video Downloader" in res.data
 
 
 def test_options_endpoint(client):

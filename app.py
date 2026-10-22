@@ -79,7 +79,7 @@ def open_folder():
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8000"))
-    print(f"\n  Video Downloader avviato: http://127.0.0.1:{port}\n")
+    print(f"\n  Grabby Video Downloader avviato: http://127.0.0.1:{port}\n")
     print(f"  I file verranno salvati in: {jobs.output_dir}\n")
     # Solo in locale: non esposto alla rete.
     app.run(host="127.0.0.1", port=port, debug=False)
