@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 128 128" role="img" aria-label="Grabby Video Downloader">
+  <defs>
+    <linearGradient id="g" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#2563eb"/>
+      <stop offset="1" stop-color="#10b981"/>
+    </linearGradient>
+  </defs>
+  <rect width="128" height="128" rx="28" fill="#1f2933"/>
+  <!-- monogramma "G" con la freccia di download al centro -->
+  <path d="M89 39 A36 36 0 1 0 100 66 H78" fill="none" stroke="url(#g)" stroke-width="13" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M60 44 V76 M49 66 L60 78 L71 66" fill="none" stroke="#e5e7eb" stroke-width="8" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>

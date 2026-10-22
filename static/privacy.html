@@ -1,0 +1,148 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grabby · Informativa privacy</title>
+<link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+<style>
+/* Colonna di lettura unica: semaforo degli scenari in testa, dettagli a seguire, fonti in fondo */
+:root {
+  --bg: #f4f6f8; --surface: #ffffff; --fg: #1f2933; --muted: #5b6672; --line: #dde2e8;
+  --accent: #2563eb; --accent-soft: #e6eefc;
+  --ok: #0f7a55; --ok-bg: #dcf3ea; --warn: #8a5a00; --warn-bg: #fbf0d6; --bad: #a3302a; --bad-bg: #f8e2e0;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161b21; --surface: #1f2933; --fg: #e8ecf0; --muted: #9aa5b1; --line: #323e4a;
+    --accent: #60a5fa; --accent-soft: #1c2b44;
+    --ok: #6ee7b7; --ok-bg: #173329; --warn: #f0c060; --warn-bg: #3a2f17; --bad: #f19a92; --bad-bg: #3d2120;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 32px 16px 64px;
+}
+main { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+h1, h2, h3 { line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(1.8rem, 5vw, 2.4rem); }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.05rem; }
+p { margin: 0; }
+a { color: var(--accent); text-underline-offset: 2px; }
+section { display: flex; flex-direction: column; gap: 14px; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.back { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; text-decoration: none; }
+.back img { width: 28px; height: 28px; }
+.eyebrow { font-family: ui-monospace, Menlo, monospace; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.lead { font-size: 1.1rem; }
+.meta { color: var(--muted); font-size: .9rem; }
+.disclaimer { border: 1px solid var(--line); background: var(--surface); padding: 14px 16px; border-radius: 8px; font-size: .93rem; color: var(--muted); }
+.disclaimer strong { color: var(--fg); }
+.verdict { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.verdict > div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.verdict .q { font-weight: 700; }
+.pill { display: inline-block; font-family: ui-monospace, Menlo, monospace; font-size: .72rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.ok { color: var(--ok); background: var(--ok-bg); }
+.pill.warn { color: var(--warn); background: var(--warn-bg); }
+.pill.bad { color: var(--bad); background: var(--bad-bg); }
+.scenarios { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.scenario { display: grid; grid-template-columns: 120px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.scenario > div { display: flex; flex-direction: column; gap: 4px; }
+.scenario .t { font-weight: 600; }
+.scenario .d { color: var(--muted); font-size: .95rem; }
+@media (max-width: 520px) { .scenario { grid-template-columns: 1fr; gap: 6px; } }
+blockquote { margin: 0; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--accent-soft); font-size: .95rem; border-radius: 0 6px 6px 0; }
+blockquote cite { display: block; font-style: normal; font-family: ui-monospace, Menlo, monospace; font-size: .75rem; color: var(--muted); margin-top: 4px; }
+ul.plain { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; }
+.ref { font-family: ui-monospace, Menlo, monospace; font-size: .85em; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: .93rem; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { font-family: ui-monospace, Menlo, monospace; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+tr:last-child td { border-bottom: 0; }
+.timeline { display: flex; flex-direction: column; border-left: 2px solid var(--line); margin-left: 6px; }
+.event { position: relative; padding: 0 0 18px 20px; display: flex; flex-direction: column; gap: 4px; }
+.event::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+.event .when { font-family: ui-monospace, Menlo, monospace; font-size: .78rem; color: var(--muted); }
+.checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.checklist li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; }
+.checklist li::before { content: "✓"; color: var(--ok); font-weight: 700; }
+.sources { font-size: .88rem; display: flex; flex-direction: column; gap: 6px; padding-left: 1.2em; margin: 0; }
+.sources li { word-break: break-word; }
+footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 16px; }
+.todo { background: var(--warn-bg); color: var(--warn); padding: 0 4px; border-radius: 4px; font-weight: 600; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a class="back" href="/"><img src="/static/logo.svg" alt=""> Torna a Grabby</a>
+    <span class="eyebrow">Grabby Video Downloader · informativa privacy · bozza del 22 ottobre 2026</span>
+    <h1>Informativa sul trattamento dei dati personali</h1>
+    <p class="lead">Ai sensi degli articoli 13 e 14 del Regolamento UE 2016/679 (GDPR). Spieghiamo quali dati raccogliamo quando usi Grabby, perché, per quanto tempo e quali sono i tuoi diritti.</p>
+    <div class="disclaimer"><strong>Bozza da far rivedere a un avvocato.</strong> Le parti evidenziate come <span class="todo">[DA COMPLETARE]</span> vanno compilate prima della pubblicazione.</div>
+  </header>
+
+  <section>
+    <h2>1. Chi è il titolare del trattamento</h2>
+    <p><span class="todo">[DA COMPLETARE: nome e cognome o ragione sociale, indirizzo, partita IVA o codice fiscale]</span></p>
+    <p>Contatto per la privacy: <span class="todo">[DA COMPLETARE: indirizzo e-mail dedicato]</span></p>
+  </section>
+
+  <section>
+    <h2>2. Quali dati raccogliamo</h2>
+    <p>Solo quando avvii un download, e solo i dati che servono allo scopo indicato al punto 3:</p>
+    <div class="table-wrap">
+      <table>
+        <tr><th>Dato</th><th>Esempio</th><th>Perché serve</th></tr>
+        <tr><td>Nome che indichi nel modulo</td><td>Mario R.</td><td>Sapere chi dichiara di assumersi la responsabilità</td></tr>
+        <tr><td>Indirizzo IP</td><td>93.41.x.x</td><td>Identificare la connessione da cui è partita la richiesta</td></tr>
+        <tr><td>Data e ora</td><td>22/10/2026 18:04</td><td>Collocare la richiesta nel tempo</td></tr>
+        <tr><td>Browser e sistema operativo (user-agent)</td><td>Safari 19 su macOS</td><td>Distinguere richieste diverse dalla stessa rete</td></tr>
+        <tr><td>Lingua del browser</td><td>it-IT</td><td>Contesto della richiesta</td></tr>
+        <tr><td>Link del video, titolo, formato e risoluzione</td><td>youtube.com/watch?v=…</td><td>Sapere quale contenuto è stato richiesto</td></tr>
+        <tr><td>Accettazione della dichiarazione di responsabilità</td><td>sì, testo versione 1</td><td>Documentare che l'utente ha dichiarato di avere il diritto di scaricare</td></tr>
+        <tr><td>Esito del download</td><td>completato / errore</td><td>Completezza del registro</td></tr>
+      </table>
+    </div>
+    <p>Non usiamo cookie di profilazione né tecniche di <em>fingerprinting</em>, e non chiediamo di registrarti. I file scaricati non restano sui nostri server: vengono consegnati al tuo browser e cancellati subito dopo; quelli non ritirati si cancellano comunque entro un'ora.</p>
+  </section>
+
+  <section>
+    <h2>3. Perché li trattiamo e su quale base giuridica</h2>
+    <ul class="plain">
+      <li><strong>Tutela dei diritti del titolare e di terzi</strong> (art. 6, par. 1, lett. f GDPR, legittimo interesse): poter dimostrare chi ha richiesto un download e cosa ha dichiarato, in caso di contestazioni per violazione del diritto d'autore, e collaborare con le autorità che lo richiedano.</li>
+      <li><strong>Sicurezza del servizio</strong> (stessa base giuridica): prevenire abusi, ad esempio un numero eccessivo di richieste dallo stesso indirizzo.</li>
+    </ul>
+    <p>Abbiamo valutato che questi interessi non prevalgono sui tuoi diritti perché raccogliamo pochi dati, non li usiamo per altri scopi e li conserviamo per un tempo limitato. <span class="todo">[DA COMPLETARE: allegare o citare la valutazione del legittimo interesse]</span></p>
+  </section>
+
+  <section>
+    <h2>4. Per quanto tempo li conserviamo</h2>
+    <p>30 giorni dalla richiesta <span class="todo">[DA CONFERMARE con l'avvocato]</span>. Poi le righe del registro vengono cancellate in automatico, salvo che servano per una contestazione in corso o per un obbligo di legge.</p>
+  </section>
+
+  <section>
+    <h2>5. Chi può vederli</h2>
+    <p>Solo il titolare e il fornitore che ospita il servizio, in qualità di responsabile del trattamento: <span class="todo">[DA COMPLETARE: nome del provider e paese dei server]</span>. Li comunichiamo alle autorità solo se ce lo chiedono per legge. Non li vendiamo e non li cediamo per pubblicità.</p>
+    <p>Trasferimenti fuori dall'Unione Europea: <span class="todo">[DA COMPLETARE: nessuno, oppure garanzie adottate]</span></p>
+  </section>
+
+  <section>
+    <h2>6. I tuoi diritti</h2>
+    <p>Puoi chiedere in ogni momento di accedere ai tuoi dati, correggerli, cancellarli, limitarne il trattamento od opporti al trattamento (articoli 15–21 GDPR), scrivendo al contatto del punto 1. Hai anche il diritto di presentare reclamo al <a href="https://www.garanteprivacy.it" target="_blank" rel="noopener">Garante per la protezione dei dati personali</a>.</p>
+    <p>Nota: dato che non chiediamo di registrarti, per trovare i tuoi dati ci servirà l'indirizzo IP e il momento approssimativo della richiesta.</p>
+  </section>
+
+  <section>
+    <h2>7. Il conferimento è obbligatorio?</h2>
+    <p>Sì, per usare il servizio: senza questi dati non possiamo avviare il download. Se non vuoi fornirli, puoi semplicemente non usare Grabby.</p>
+  </section>
+
+  <footer>Bozza del 22 ottobre 2026 · da far rivedere a un avvocato prima della pubblicazione · <a href="/note-legali">Note legali</a></footer>
+</main>
+</body>
+</html>

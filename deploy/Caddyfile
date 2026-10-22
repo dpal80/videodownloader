@@ -1,0 +1,24 @@
+# Caddy ottiene e rinnova da solo il certificato HTTPS per {$DOMINIO}.
+{
+	email {$EMAIL}
+}
+
+{$DOMINIO} {
+	encode zstd gzip
+
+	header {
+		Strict-Transport-Security "max-age=31536000; includeSubDomains"
+		X-Content-Type-Options "nosniff"
+		X-Frame-Options "DENY"
+		Referrer-Policy "strict-origin-when-cross-origin"
+		Permissions-Policy "camera=(), microphone=(), geolocation=()"
+		-Server
+	}
+
+	# Il limite per IP lo applica Grabby (GRABBY_LIMITE_ORARIO): Caddy gli
+	# passa l'IP vero nell'intestazione X-Forwarded-For.
+	reverse_proxy grabby:8000
+
+	# Nessuna direttiva "log": Caddy non scrive log degli accessi. L'unico
+	# registro con dati personali è quello di Grabby, con la sua scadenza.
+}
