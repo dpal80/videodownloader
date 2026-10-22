@@ -66,6 +66,14 @@ def test_rendered_text_matches_translations(client):
             assert f'data-i18n="{key}">{seo.t("it", key)}<' not in page, key
 
 
+def test_translation_keys_stay_in_page(client):
+    page = client.get("/fr/").get_data(as_text=True)
+    assert 'data-i18n-href="legal"' in page and 'data-i18n-href="privacy"' in page
+    assert 'data-i18n-placeholder="confirm.name.placeholder"' in page
+    assert 'data-i18n-label="langs.label"' in page
+    assert 'href="undefined"' not in page
+
+
 def test_robots(client, monkeypatch):
     assert "Disallow: /\n" in client.get("/robots.txt").get_data(as_text=True)
     monkeypatch.setattr(app_module, "ONLINE", True)

@@ -57,11 +57,11 @@ def _translate_body(page: str, lang: str) -> str:
     def fix_tag(match):
         tag = match.group(0)
         if key := re.search(r'data-i18n-placeholder="([^"]+)"', tag):
-            tag = re.sub(r'placeholder="[^"]*"', f'placeholder="{html.escape(t(lang, key.group(1)))}"', tag)
+            tag = re.sub(r'(?<![\w-])placeholder="[^"]*"', f'placeholder="{html.escape(t(lang, key.group(1)))}"', tag)
         if key := re.search(r'data-i18n-label="([^"]+)"', tag):
-            tag = re.sub(r'aria-label="[^"]*"', f'aria-label="{html.escape(t(lang, key.group(1)))}"', tag)
+            tag = re.sub(r'(?<![\w-])aria-label="[^"]*"', f'aria-label="{html.escape(t(lang, key.group(1)))}"', tag)
         if key := re.search(r'data-i18n-href="([^"]+)"', tag):
-            tag = re.sub(r'href="[^"]*"', f'href="{links[key.group(1)]}"', tag)
+            tag = re.sub(r'(?<![\w-])href="[^"]*"', f'href="{links[key.group(1)]}"', tag)
         return tag
 
     return re.sub(r"<[a-z]+\b[^>]*data-i18n-(?:placeholder|label|href)=[^>]*>", fix_tag, page)
