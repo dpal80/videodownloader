@@ -383,7 +383,11 @@
 
   function detect() {
     const fromUrl = new URLSearchParams(location.search).get("lang");
-    if (supported.includes(fromUrl)) return fromUrl;
+    if (supported.includes(fromUrl)) {
+      // Anche la lingua scelta con il link viene ricordata.
+      try { localStorage.setItem("grabby-lang", fromUrl); } catch (e) { /* non indispensabile */ }
+      return fromUrl;
+    }
     const stored = readStored();
     if (supported.includes(stored)) return stored;
     for (const tag of navigator.languages || [navigator.language || ""]) {
