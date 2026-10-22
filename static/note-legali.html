@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Grabby e il diritto d'autore</title>
+<link rel="icon" href="/static/logo.svg" type="image/svg+xml">
+<style>
+/* Colonna di lettura unica: semaforo degli scenari in testa, dettagli a seguire, fonti in fondo */
+:root {
+  --bg: #f4f6f8; --surface: #ffffff; --fg: #1f2933; --muted: #5b6672; --line: #dde2e8;
+  --accent: #2563eb; --accent-soft: #e6eefc;
+  --ok: #0f7a55; --ok-bg: #dcf3ea; --warn: #8a5a00; --warn-bg: #fbf0d6; --bad: #a3302a; --bad-bg: #f8e2e0;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #161b21; --surface: #1f2933; --fg: #e8ecf0; --muted: #9aa5b1; --line: #323e4a;
+    --accent: #60a5fa; --accent-soft: #1c2b44;
+    --ok: #6ee7b7; --ok-bg: #173329; --warn: #f0c060; --warn-bg: #3a2f17; --bad: #f19a92; --bad-bg: #3d2120;
+  }
+}
+* { box-sizing: border-box; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  padding: 32px 16px 64px;
+}
+main { max-width: 760px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+h1, h2, h3 { line-height: 1.2; margin: 0; }
+h1 { font-size: clamp(1.8rem, 5vw, 2.4rem); }
+h2 { font-size: 1.4rem; }
+h3 { font-size: 1.05rem; }
+p { margin: 0; }
+a { color: var(--accent); text-underline-offset: 2px; }
+section { display: flex; flex-direction: column; gap: 14px; }
+header { display: flex; flex-direction: column; gap: 12px; }
+.back { display: inline-flex; align-items: center; gap: 8px; font-weight: 600; text-decoration: none; }
+.back img { width: 28px; height: 28px; }
+.eyebrow { font-family: ui-monospace, Menlo, monospace; font-size: .75rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.lead { font-size: 1.1rem; }
+.meta { color: var(--muted); font-size: .9rem; }
+.disclaimer { border: 1px solid var(--line); background: var(--surface); padding: 14px 16px; border-radius: 8px; font-size: .93rem; color: var(--muted); }
+.disclaimer strong { color: var(--fg); }
+.verdict { display: grid; grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); gap: 12px; }
+.verdict > div { background: var(--surface); border: 1px solid var(--line); border-radius: 8px; padding: 16px; display: flex; flex-direction: column; gap: 8px; }
+.verdict .q { font-weight: 700; }
+.pill { display: inline-block; font-family: ui-monospace, Menlo, monospace; font-size: .72rem; font-weight: 600; letter-spacing: .05em; text-transform: uppercase; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+.pill.ok { color: var(--ok); background: var(--ok-bg); }
+.pill.warn { color: var(--warn); background: var(--warn-bg); }
+.pill.bad { color: var(--bad); background: var(--bad-bg); }
+.scenarios { display: flex; flex-direction: column; border-top: 1px solid var(--line); }
+.scenario { display: grid; grid-template-columns: 120px 1fr; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--line); }
+.scenario > div { display: flex; flex-direction: column; gap: 4px; }
+.scenario .t { font-weight: 600; }
+.scenario .d { color: var(--muted); font-size: .95rem; }
+@media (max-width: 520px) { .scenario { grid-template-columns: 1fr; gap: 6px; } }
+blockquote { margin: 0; padding: 10px 14px; border-left: 3px solid var(--accent); background: var(--accent-soft); font-size: .95rem; border-radius: 0 6px 6px 0; }
+blockquote cite { display: block; font-style: normal; font-family: ui-monospace, Menlo, monospace; font-size: .75rem; color: var(--muted); margin-top: 4px; }
+ul.plain { margin: 0; padding-left: 1.2em; display: flex; flex-direction: column; gap: 8px; }
+.ref { font-family: ui-monospace, Menlo, monospace; font-size: .85em; }
+.table-wrap { overflow-x: auto; border: 1px solid var(--line); border-radius: 8px; background: var(--surface); }
+table { border-collapse: collapse; width: 100%; min-width: 560px; font-size: .93rem; }
+th, td { text-align: left; vertical-align: top; padding: 10px 12px; border-bottom: 1px solid var(--line); }
+th { font-family: ui-monospace, Menlo, monospace; font-size: .72rem; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); font-weight: 500; }
+tr:last-child td { border-bottom: 0; }
+.timeline { display: flex; flex-direction: column; border-left: 2px solid var(--line); margin-left: 6px; }
+.event { position: relative; padding: 0 0 18px 20px; display: flex; flex-direction: column; gap: 4px; }
+.event::before { content: ""; position: absolute; left: -7px; top: 6px; width: 12px; height: 12px; border-radius: 50%; background: var(--bg); border: 2px solid var(--accent); }
+.event .when { font-family: ui-monospace, Menlo, monospace; font-size: .78rem; color: var(--muted); }
+.checklist { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 10px; }
+.checklist li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; }
+.checklist li::before { content: "✓"; color: var(--ok); font-weight: 700; }
+.sources { font-size: .88rem; display: flex; flex-direction: column; gap: 6px; padding-left: 1.2em; margin: 0; }
+.sources li { word-break: break-word; }
+footer { color: var(--muted); font-size: .85rem; border-top: 1px solid var(--line); padding-top: 16px; }
+</style>
+</head>
+<body>
+<main>
+  <header>
+    <a class="back" href="/"><img src="/static/logo.svg" alt=""> Torna a Grabby</a>
+    <span class="eyebrow">Grabby Video Downloader · note legali · aggiornate al 22 ottobre 2026</span>
+    <h1>Posso scaricare video da YouTube e Facebook con Grabby?</h1>
+    <p class="lead">In breve: le regole di YouTube e di Meta non lo permettono, ma violare quelle regole non è di per sé un reato. Quello che conta davvero per la legge è <em>quale</em> video scarichi e <em>cosa ci fai</em> dopo. Per un uso privato, sul tuo computer, il rischio concreto è basso; diventa serio se condividi i video o distribuisci l'app ad altri.</p>
+    <div class="disclaimer"><strong>Non è consulenza legale.</strong> È una ricerca informativa basata su fonti pubbliche (elencate in fondo). Per decisioni importanti, come pubblicare l'app o usarla per lavoro, conviene chiedere a un avvocato esperto di diritto d'autore.</div>
+  </header>
+
+  <section>
+    <span class="eyebrow">La risposta in tre righe</span>
+    <div class="verdict">
+      <div>
+        <span class="q">Lo permette YouTube?</span>
+        <span><span class="pill bad">No</span></span>
+        <p class="meta">I Termini vietano di scaricare contenuti se non con le funzioni ufficiali (es. offline di YouTube Premium) o con un permesso scritto.</p>
+      </div>
+      <div>
+        <span class="q">Lo permette Meta?</span>
+        <span><span class="pill bad">No</span></span>
+        <p class="meta">I Termini vietano di accedere o raccogliere dati con mezzi automatici senza permesso, e di violare i diritti d'autore altrui.</p>
+      </div>
+      <div>
+        <span class="q">È illegale in Italia?</span>
+        <span><span class="pill warn">Dipende</span></span>
+        <p class="meta">Dai video tuoi o con licenza libera: nessun problema. Da video altrui: zona grigia per uso privato, illecito se li ridiffondi.</p>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Il semaforo: scenario per scenario</h2>
+    <div class="scenarios">
+      <div class="scenario">
+        <div><span class="pill ok">Verde</span></div>
+        <div><span class="t">Video che hai caricato tu</span><span class="d">Sono tuoi. YouTube Studio e la funzione "Scarica le tue informazioni" di Facebook li offrono già; usare Grabby al loro posto viola tecnicamente i Termini, ma non c'è nessun diritto altrui in gioco.</span></div>
+      </div>
+      <div class="scenario">
+        <div><span class="pill ok">Verde</span></div>
+        <div><span class="t">Video con licenza Creative Commons o di pubblico dominio</span><span class="d">Il diritto d'autore lo consente (rispettando la licenza, es. citare l'autore). Resta la violazione formale dei Termini della piattaforma, con rischi minimi.</span></div>
+      </div>
+      <div class="scenario">
+        <div><span class="pill ok">Verde</span></div>
+        <div><span class="t">Video di cui hai il permesso dell'autore</span><span class="d">Es. il video di un amico, di un cliente, di un evento in cui l'organizzatore ti autorizza. Meglio avere il permesso per iscritto.</span></div>
+      </div>
+      <div class="scenario">
+        <div><span class="pill warn">Giallo</span></div>
+        <div><span class="t">Video altrui, solo per guardarli offline tu</span><span class="d">La copia privata (art. 71-sexies L. 633/1941) esiste, ma esclude le opere fruite "on demand" online quando sono protette da misure tecniche o da un contratto, e vale solo da fonte lecita. È una zona grigia: rischio pratico basso, ma non è un diritto garantito.</span></div>
+      </div>
+      <div class="scenario">
+        <div><span class="pill bad">Rosso</span></div>
+        <div><span class="t">Video caricati illegalmente (film, partite, serie piratate)</span><span class="d">Se la fonte è illecita la copia privata non vale mai (Corte di Giustizia UE, ACI Adam, 2014). Scaricarli è un illecito, anche solo per sé.</span></div>
+      </div>
+      <div class="scenario">
+        <div><span class="pill bad">Rosso</span></div>
+        <div><span class="t">Ricaricare, condividere o usare per lavoro video altrui</span><span class="d">Mettere online opere protette senza permesso è reato (art. 171 L. 633/1941). Usarle per fini commerciali aggrava la situazione.</span></div>
+      </div>
+      <div class="scenario">
+        <div><span class="pill warn">Giallo</span> <span class="pill bad">Rosso</span></div>
+        <div><span class="t">Distribuire Grabby ad altri, o offrirlo come servizio online</span><span class="d">Da valutare con attenzione: vedi la sezione "Uso personale o distribuzione" più sotto.</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Cosa dicono i Termini di YouTube</h2>
+    <p>Nella sezione "Autorizzazioni e limitazioni" dei <a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener">Termini di servizio</a>, YouTube elenca cosa non si può fare. Tre punti riguardano direttamente Grabby:</p>
+    <blockquote>"access, reproduce, download, distribute […] any part of the Service or any Content", salvo quando è espressamente autorizzato dal servizio o con permesso scritto di YouTube e dei titolari dei diritti.<cite>Termini YouTube, punto 1 delle limitazioni</cite></blockquote>
+    <blockquote>"circumvent, disable, fraudulently engage with, or otherwise interfere with any part of the Service"<cite>Termini YouTube, punto 2</cite></blockquote>
+    <blockquote>"access the Service using any automated means (such as robots, botnets or scrapers)", salvo i motori di ricerca pubblici o con permesso scritto.<cite>Termini YouTube, punto 3</cite></blockquote>
+    <p>L'unico modo "ufficiale" per vedere un video offline è la funzione di download nell'app YouTube (con Premium), che però tiene il file dentro l'app e non lo salva sul computer.</p>
+    <h3>Cosa rischi in pratica</h3>
+    <ul class="plain">
+      <li>I Termini sono un contratto: violarli non è un reato. La conseguenza tipica è che YouTube blocca l'accesso (errori, richieste di verifica "non sei un bot", blocco temporaneo dell'IP).</li>
+      <li>Se usi i cookie del tuo account Google per scaricare, in teoria YouTube può sospendere l'account. Grabby non li usa.</li>
+      <li>YouTube cambia spesso i propri meccanismi per ostacolare gli strumenti esterni: è un motivo tecnico per tenere yt-dlp aggiornato, non un rischio legale in sé.</li>
+    </ul>
+  </section>
+
+  <section>
+    <h2>Cosa dicono i Termini di Meta (Facebook)</h2>
+    <p>I <a href="https://www.facebook.com/terms" target="_blank" rel="noopener">Termini d'uso di Meta</a> (versione in vigore dal 1° gennaio 2025, sezione "Cosa puoi condividere e fare") contengono due divieti rilevanti:</p>
+    <blockquote>"You may not access or collect data from our Products using automated means (without our prior permission)", anche quando non si è collegati a un account.<cite>Termini Meta, sez. 3.2</cite></blockquote>
+    <blockquote>Non puoi usare i Prodotti Meta per fare qualcosa che "infringes or violates someone else's rights, including their intellectual property rights".<cite>Termini Meta, sez. 3.2</cite></blockquote>
+    <p>Facebook non offre un pulsante per scaricare i video di altri. Per i tuoi contenuti c'è lo strumento "Scarica le tue informazioni". Molti video su Facebook contengono musica concessa in licenza solo per l'uso dentro la piattaforma, quindi una copia esterna può toccare anche i diritti musicali.</p>
+  </section>
+
+  <section>
+    <h2>Cosa dice la legge italiana ed europea</h2>
+    <p>La legge sul diritto d'autore (<span class="ref">L. 633/1941</span>) è quella che conta davvero, perché vale indipendentemente dai Termini delle piattaforme.</p>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Norma</th><th>Cosa dice, in parole semplici</th><th>Perché ti riguarda</th></tr></thead>
+        <tbody>
+          <tr><td class="ref">Art. 71-sexies c.1</td><td>Puoi fare una copia privata di audio e video, per uso strettamente personale, senza scopo di lucro, rispettando le misure tecniche di protezione.</td><td>È la base che rende possibile la copia per sé.</td></tr>
+          <tr><td class="ref">Art. 71-sexies c.2</td><td>La copia privata non può essere fatta da terzi per conto tuo. Un servizio che fa copie per gli utenti è trattato come riproduzione non autorizzata.</td><td>Un'app locale va bene; un sito "Grabby online" per altri no.</td></tr>
+          <tr><td class="ref">Art. 71-sexies c.3</td><td>La copia privata non vale per opere messe a disposizione online "on demand" se protette da misure tecniche o regolate da un contratto.</td><td>È proprio il caso di YouTube e Facebook: qui nasce la zona grigia.</td></tr>
+          <tr><td class="ref">Art. 102-quater</td><td>I titolari possono proteggere le opere con misure tecnologiche; eluderle è vietato.</td><td>yt-dlp non tocca i video con DRM. Il dubbio è se le protezioni di YouTube contino come "misura efficace".</td></tr>
+          <tr><td class="ref">Art. 174-ter</td><td>Chi duplica o riproduce abusivamente opere protette, anche per sé, rischia una sanzione amministrativa (154 €, più confisca e pubblicazione del provvedimento).</td><td>È il rischio tipico per un uso personale non coperto da copia privata.</td></tr>
+          <tr><td class="ref">Art. 171</td><td>Mettere a disposizione del pubblico in rete opere protette senza diritto è reato.</td><td>Vale se ricarichi o condividi i video scaricati.</td></tr>
+          <tr><td class="ref">Art. 171-ter</td><td>Per usi non personali punisce, tra l'altro, chi distribuisce strumenti con la finalità prevalente di eludere misure tecnologiche.</td><td>Rilevante solo se un giorno distribuissi l'app ad altri.</td></tr>
+          <tr><td class="ref">CGUE C-435/12 (ACI Adam, 2014)</td><td>La copia privata si può fare solo da una fonte lecita.</td><td>Un film piratato caricato su YouTube non si può scaricare nemmeno per sé.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Casi noti su youtube-dl e yt-dlp</h2>
+    <p>Grabby usa yt-dlp, che deriva da youtube-dl. Questi precedenti spiegano dove sta il rischio.</p>
+    <div class="timeline">
+      <div class="event"><span class="when">Ottobre 2020 · Stati Uniti</span><h3>La RIAA fa rimuovere youtube-dl da GitHub</h3><p>L'associazione dei discografici americani lo definì uno strumento per aggirare protezioni (DMCA, sezione 1201), citando alcuni video musicali usati nei test del codice.</p></div>
+      <div class="event"><span class="when">Novembre 2020 · Stati Uniti</span><h3>GitHub lo ripristina</h3><p>Dopo una lettera dell'EFF, GitHub concluse che youtube-dl non aggira alcuna protezione e riconobbe gli usi legittimi (giornalismo, accessibilità, video con licenza libera).</p></div>
+      <div class="event"><span class="when">Marzo 2023 · Germania</span><h3>Il tribunale di Amburgo condanna l'hosting del sito</h3><p>Sony, Warner e Universal fecero causa a Uberspace, che ospitava il sito di youtube-dl. Il tribunale considerò il meccanismo di YouTube una misura tecnica efficace.</p></div>
+      <div class="event"><span class="when">Novembre 2024 · Germania</span><h3>La Corte d'appello di Amburgo conferma</h3><p>Il caso riguarda chi <em>distribuisce</em> lo strumento, non chi lo usa. youtube-dl e yt-dlp restano disponibili su GitHub.</p></div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Uso personale o distribuzione</h2>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Situazione</th><th>Rischio</th><th>Perché</th></tr></thead>
+        <tbody>
+          <tr><td>Grabby gira solo sul tuo computer, lo usi tu</td><td><span class="pill ok">Basso</span></td><td>Violazione dei Termini sì, ma nessuna distribuzione. Le azioni legali contro singoli utenti per uso privato sono rarissime.</td></tr>
+          <tr><td>Repository GitHub pubblico, codice open source</td><td><span class="pill warn">Medio-basso</span></td><td>Grabby è un'interfaccia sopra yt-dlp, pubblico da anni. Possibili segnalazioni DMCA, soprattutto se il progetto diventa popolare o è presentato come strumento "per scaricare musica".</td></tr>
+          <tr><td>App distribuita a terzi</td><td><span class="pill warn">Medio</span></td><td>Entri nel ruolo del "distributore", quello colpito nel caso tedesco.</td></tr>
+          <tr><td>Sito o servizio online che scarica per gli altri</td><td><span class="pill bad">Alto</span></td><td>Art. 71-sexies c.2: la copia fatta da terzi non è copia privata.</td></tr>
+          <tr><td>Qualsiasi versione a pagamento o con pubblicità</td><td><span class="pill bad">Alto</span></td><td>Lo scopo di lucro esclude la copia privata e aggrava gli illeciti.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section>
+    <h2>Accorgimenti di Grabby</h2>
+    <ul class="checklist">
+      <li><span>È un'<strong>app locale per uso personale</strong>: ascolta solo su 127.0.0.1 e non è raggiungibile da altri.</span></li>
+      <li><span>Non usa i <strong>cookie del tuo account</strong> Google o Facebook.</span></li>
+      <li><span>Non aggira <strong>sistemi DRM</strong> e non scarica contenuti a pagamento.</span></li>
+      <li><span>Non usa loghi o nomi di YouTube e Facebook nel proprio marchio e non è affiliato a Google o Meta.</span></li>
+      <li><span>Niente <strong>pubblicità né versioni a pagamento</strong>.</span></li>
+    </ul>
+  </section>
+
+  <section>
+    <span class="eyebrow">Fonti consultate</span>
+    <ol class="sources">
+      <li><a href="https://www.youtube.com/t/terms" target="_blank" rel="noopener">YouTube, Termini di servizio</a></li>
+      <li><a href="https://www.facebook.com/terms" target="_blank" rel="noopener">Meta, Termini d'uso</a></li>
+      <li><a href="https://developers.facebook.com/docs/development/terms-and-policies/automated-data-collection/" target="_blank" rel="noopener">Meta, Automated Data Collection Terms</a></li>
+      <li><a href="https://brocardi.it/legge-diritto-autore/titolo-i/capo-v/sezione-ii/art71sexies.html" target="_blank" rel="noopener">L. 633/1941, art. 71-sexies (Brocardi)</a></li>
+      <li><a href="https://brocardi.it/legge-diritto-autore/titolo-iii/capo-iii/sezione-ii/art174ter.html" target="_blank" rel="noopener">L. 633/1941, art. 174-ter (Brocardi)</a></li>
+      <li><a href="https://www.wipo.int/wipolex/en/text/477540" target="_blank" rel="noopener">Legge italiana sul diritto d'autore, testo su WIPO Lex</a></li>
+      <li><a href="https://ipkitten.blogspot.com/2014/04/breaking-news-cjeu-says-that-private.html?m=0" target="_blank" rel="noopener">CGUE C-435/12 ACI Adam, commento IPKat</a></li>
+      <li><a href="https://www.eff.org/deeplinks/2020/11/github-reinstates-youtube-dl-after-riaas-abuse-dmca" target="_blank" rel="noopener">EFF, GitHub reinstates youtube-dl (2020)</a></li>
+      <li><a href="https://torrentfreak.com/court-rejects-appeal-of-youtube-dl-hosting-provider-uberspace-241127/" target="_blank" rel="noopener">TorrentFreak, appello Uberspace respinto (2024)</a></li>
+      <li><a href="https://heise.de/-10179284" target="_blank" rel="noopener">heise, OLG Hamburg: Uberspace responsabile per youtube-dl</a></li>
+    </ol>
+  </section>
+
+  <footer>Ricerca aggiornata al 22 ottobre 2026. Le regole delle piattaforme e la giurisprudenza cambiano: prima di pubblicare o distribuire l'app conviene ricontrollare le fonti.</footer>
+</main>
+</body>
+</html>

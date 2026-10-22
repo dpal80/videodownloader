@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+  <!-- Sfondo astratto Grabby 4: macchie sfocate nei colori del marchio e onde leggere -->
+  <defs>
+    <linearGradient id="base" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#1f2933"/><stop offset="1" stop-color="#0f2741"/></linearGradient>
+    <filter id="blur" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="140"/></filter>
+  </defs>
+  <rect width="1920" height="1080" fill="url(#base)"/>
+  <g filter="url(#blur)"><circle cx="231" cy="267" r="539" fill="#60a5fa" opacity="0.56"/><circle cx="364" cy="463" r="327" fill="#34d399" opacity="0.57"/><circle cx="1563" cy="855" r="367" fill="#2563eb" opacity="0.42"/><circle cx="802" cy="333" r="327" fill="#60a5fa" opacity="0.56"/><circle cx="412" cy="56" r="468" fill="#34d399" opacity="0.43"/></g>
+  <path d="M0 397 C 641 284, 799 510, 1920 341" fill="none" stroke="#ffffff" stroke-opacity="0.05" stroke-width="2"/><path d="M0 432 C 739 350, 701 514, 1920 391" fill="none" stroke="#ffffff" stroke-opacity="0.08" stroke-width="3"/><path d="M0 832 C 850 684, 590 980, 1920 758" fill="none" stroke="#ffffff" stroke-opacity="0.11" stroke-width="4"/><path d="M0 577 C 599 439, 841 715, 1920 508" fill="none" stroke="#ffffff" stroke-opacity="0.14" stroke-width="5"/>
+</svg>

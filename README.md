@@ -17,6 +17,7 @@ incolli il link, scegli formato e risoluzione e premi **Scarica**.
 - Barra di avanzamento con velocità e tempo rimanente
 - I file finiscono nella cartella **Download**
 - Icona da cliccare nel Dock (Mac) o sul Desktop (Windows)
+- Sfondo dinamico a tutto schermo, con la copertina del video che stai scaricando
 
 Sotto il cofano usa [yt-dlp](https://github.com/yt-dlp/yt-dlp) per il download
 e [ffmpeg](https://ffmpeg.org/) per unire audio/video e convertire i formati.
@@ -65,7 +66,7 @@ cd videodownloader
 Lo script crea **Grabby** nella cartella Applicazioni del tuo utente
 (`~/Applications`) e la mostra nel Finder: trascinala nel **Dock**.
 Da quel momento basta un clic sull'icona: Grabby si accende e apre la pagina
-nel browser. Al primo avvio ci vuole circa un minuto (scarica Python e le
+nel browser. Un secondo clic riapre solo la pagina. Al primo avvio ci vuole circa un minuto (scarica Python e le
 dipendenze), poi è immediato.
 
 Preferisci il Terminale? Funziona anche:
@@ -75,11 +76,9 @@ cd /Users/danielepallotta/Projects/videodownloader
 ./avvia.sh
 ```
 
-Grabby resta acceso in sottofondo fino al riavvio del Mac. Per spegnerlo prima:
-
-```bash
-lsof -ti tcp:8000 | xargs kill
-```
+Grabby resta acceso finché l'app è aperta: per spegnerlo **esci dall'app**
+(Cmd+Q o clic destro sull'icona nel Dock › Esci). Se l'hai avviato da
+Terminale, premi `Ctrl + C`.
 
 ---
 
@@ -128,6 +127,24 @@ Puoi anche avviarlo direttamente con un doppio clic su **`avvia.bat`**.
 
 ---
 
+## Avviso legale
+
+Grabby Video Downloader è uno strumento per uso personale e privato.
+Usalo solo per scaricare video di cui possiedi i diritti, video con
+licenza libera (es. Creative Commons, pubblico dominio) o video per
+cui hai ottenuto il permesso dell'autore.
+
+Scaricare contenuti da YouTube o Facebook può violare i loro Termini
+di servizio. Non usare Grabby per scaricare, ridistribuire o
+pubblicare opere protette da diritto d'autore senza autorizzazione.
+Grabby non aggira sistemi DRM e non è affiliato a YouTube, Google,
+Facebook o Meta.
+
+L'utente è l'unico responsabile dell'uso che fa del software.
+L'analisi completa, **Grabby e il diritto d'autore**, è in
+[`static/note-legali.html`](static/note-legali.html) e nell'app alla pagina
+http://127.0.0.1:8000/note-legali. Non è consulenza legale.
+
 ## Aggiornare Grabby
 
 YouTube e Facebook cambiano spesso: ogni avvio aggiorna già yt-dlp da solo.
@@ -174,7 +191,7 @@ Struttura:
 
 - `app.py`: server Flask (pagina e API `/api/info`, `/api/download`, `/api/progress/<id>`)
 - `downloader.py`: logica di download con yt-dlp
-- `static/`: la pagina web e il logo
+- `static/`: la pagina web, il logo, gli sfondi (`sfondi/`) e le note legali
 - `icone/`: icone per Mac (PNG 1024px) e Windows (`.ico`)
 - `avvia.sh`, `crea-app-mac.sh`: avvio e creazione dell'app su Mac
 - `avvia.bat`, `crea-collegamento-windows.bat`: avvio e collegamento su Windows

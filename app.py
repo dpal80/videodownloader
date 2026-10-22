@@ -21,6 +21,11 @@ def index():
     return send_from_directory(app.static_folder, "index.html")
 
 
+@app.get("/note-legali")
+def legal_notes():
+    return send_from_directory(app.static_folder, "note-legali.html")
+
+
 @app.get("/api/options")
 def options():
     return jsonify(
