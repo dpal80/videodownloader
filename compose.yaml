@@ -8,6 +8,8 @@ services:
     ports:
       - "127.0.0.1:${PORT:-8000}:8000"
     environment:
+      # Ora italiana nel registro (il container altrimenti usa UTC).
+      TZ: "${TZ:-Europe/Rome}"
       # Mostrata nella pagina al posto di /downloads.
       DOWNLOAD_DIR_LABEL: "${DOWNLOAD_DIR:-~/Downloads}"
       # Registro dei download sul Mac, con il nome dell'utente del Mac.

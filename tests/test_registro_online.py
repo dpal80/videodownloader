@@ -124,3 +124,9 @@ def test_rate_limiter_window():
     assert limiter.allow("a") and limiter.allow("a")
     assert not limiter.allow("a")
     assert limiter.allow("b")
+
+
+def test_log_time_has_timezone(tmp_path):
+    log = DownloadLog(tmp_path / "r.csv", retention_days=30)
+    log.record({"nome": "x"})
+    assert datetime.fromisoformat(read_log(log.path)[0]["data_ora"]).tzinfo is not None

@@ -6,7 +6,7 @@ import csv
 import getpass
 import os
 import threading
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
 from pathlib import Path
 
 # Avviso che l'utente accetta prima di scaricare: la versione finisce nel registro,
@@ -58,11 +58,17 @@ def _safe(value) -> str:
     return "'" + text if text[:1] in ("=", "+", "-", "@") else text
 
 
+def _now() -> datetime:
+    # Con il fuso orario (es. +02:00): l'ora resta chiara anche nel container.
+    return datetime.now().astimezone()
+
+
 def _parse_date(value) -> datetime:
     try:
-        return datetime.fromisoformat(str(value))
+        date = datetime.fromisoformat(str(value))
     except ValueError:
-        return datetime.max  # riga illeggibile: meglio tenerla che perderla
+        return datetime.max.replace(tzinfo=timezone.utc)  # riga illeggibile: meglio tenerla
+    return date if date.tzinfo else date.astimezone()
 
 
 class DownloadLog:
@@ -77,7 +83,7 @@ class DownloadLog:
         """Cancella le righe più vecchie di retention_days. Restituisce quante."""
         if not self.retention_days or not self.path.exists():
             return 0
-        now = now or datetime.now()
+        now = now or _now()
         limit = now - timedelta(days=self.retention_days)
         with self._lock:
             with open(self.path, newline="", encoding="utf-8-sig") as f:
@@ -92,7 +98,7 @@ class DownloadLog:
         return len(rows) - len(keep)
 
     def record(self, row: dict) -> None:
-        now = datetime.now()
+        now = _now()
         if self.retention_days and (self._last_purge is None or now - self._last_purge > timedelta(days=1)):
             self.purge(now)
         row = {"data_ora": now.isoformat(timespec="seconds"), **row}

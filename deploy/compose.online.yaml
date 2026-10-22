@@ -11,6 +11,7 @@ services:
     image: grabby-video-downloader
     restart: unless-stopped
     environment:
+      TZ: "${TZ:-Europe/Rome}"
       GRABBY_MODE: online
       # Un proxy davanti (Caddy): serve per leggere l'IP vero dell'utente.
       GRABBY_PROXY_FIDATI: "1"
