@@ -4,6 +4,17 @@
 set -e
 cd "$(dirname "$0")"
 
+PORT="${PORT:-8000}"
+export PORT
+# Avviato dal Finder il PATH è minimo: aggiunge le cartelle di Homebrew e uv.
+export PATH="$HOME/.local/bin:/opt/homebrew/bin:/usr/local/bin:$PATH"
+
+# Se Grabby è già acceso, apre solo la pagina.
+if curl -fs -o /dev/null "http://127.0.0.1:${PORT}/api/options"; then
+  open "http://127.0.0.1:${PORT}"
+  exit 0
+fi
+
 if ! command -v ffmpeg >/dev/null 2>&1; then
   echo "ffmpeg non trovato. Installalo con:  brew install ffmpeg"
   exit 1
@@ -36,7 +47,5 @@ else
   ./.venv/bin/python -m pip install -q --upgrade -r requirements.txt
 fi
 
-PORT="${PORT:-8000}"
-export PORT
 ( sleep 2 && open "http://127.0.0.1:${PORT}" >/dev/null 2>&1 || true ) &
 exec ./.venv/bin/python app.py
