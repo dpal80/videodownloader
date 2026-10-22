@@ -484,11 +484,14 @@
     if (!url) return showMsg(t("msg.paste"), "error", "msg.paste");
     showMsg("");
     $("accept").checked = false;
+    $("confirm-ok").disabled = true;
     $("confirm").showModal();
     $("accept").focus();
   });
 
   $("confirm-cancel").addEventListener("click", () => $("confirm").close());
+  // Il pulsante si attiva solo dopo aver spuntato la dichiarazione.
+  $("accept").addEventListener("change", () => { $("confirm-ok").disabled = !$("accept").checked; });
 
   $("confirm-form").addEventListener("submit", (e) => {
     if (!$("accept").checked) { e.preventDefault(); $("accept").focus(); return; }
