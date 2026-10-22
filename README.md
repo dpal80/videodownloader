@@ -198,3 +198,30 @@ Struttura:
 
 Il server ascolta solo su `127.0.0.1`, quindi non è raggiungibile da altri
 dispositivi della rete.
+
+## 🐳 In alternativa: Grabby in un container Docker
+
+Se hai [Docker Desktop](https://www.docker.com/products/docker-desktop/) non
+servono né Python né ffmpeg sul computer: sono tutti dentro il container.
+
+```bash
+cd /Users/danielepallotta/Projects/videodownloader
+docker compose up -d --build
+```
+
+Poi apri **http://127.0.0.1:8000**. Il container si riavvia da solo insieme a
+Docker Desktop; per spegnerlo:
+
+```bash
+docker compose down
+```
+
+- I video finiscono nella cartella **Download** del Mac (per cambiarla:
+  `DOWNLOAD_DIR=~/Movies docker compose up -d`).
+- La pagina è raggiungibile solo da questo computer (`127.0.0.1`).
+- Dal container non si può aprire il Finder, quindi il pulsante
+  **Apri cartella** non compare: i file li trovi in Download.
+- Per aggiornare yt-dlp ricostruisci l'immagine:
+  `docker compose build --no-cache && docker compose up -d`.
+
+Non usare insieme container e app Grabby: occupano la stessa porta 8000.

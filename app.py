@@ -10,6 +10,8 @@ from downloader import FORMATS, RESOLUTIONS, JobManager, get_info, is_supported_
 
 app = Flask(__name__, static_folder="static")
 jobs = JobManager()
+# Nel container (vedi Dockerfile) non c'è un Finder da aprire.
+CAN_OPEN_FOLDER = os.environ.get("GRABBY_IN_CONTAINER") != "1"
 
 
 def _json_body() -> dict:
@@ -31,7 +33,9 @@ def options():
     return jsonify(
         formats=[{"value": k, "label": v["label"], "audio_only": v["audio_only"]} for k, v in FORMATS.items()],
         resolutions=RESOLUTIONS,
-        download_dir=str(jobs.output_dir),
+        # Nel container la cartella vera è sul Mac: compose.yaml la passa come etichetta.
+        download_dir=os.environ.get("DOWNLOAD_DIR_LABEL") or str(jobs.output_dir),
+        can_open_folder=CAN_OPEN_FOLDER,
     )
 
 
@@ -72,6 +76,8 @@ def progress(job_id):
 @app.post("/api/open-folder")
 def open_folder():
     """Apre la cartella dei download nel Finder (o equivalente)."""
+    if not CAN_OPEN_FOLDER:
+        return jsonify(ok=False, error="Nel container non posso aprire la cartella."), 200
     path = str(jobs.output_dir)
     if sys.platform == "darwin":
         subprocess.Popen(["open", path])
@@ -86,5 +92,6 @@ if __name__ == "__main__":
     port = int(os.environ.get("PORT", "8000"))
     print(f"\n  Grabby Video Downloader avviato: http://127.0.0.1:{port}\n")
     print(f"  I file verranno salvati in: {jobs.output_dir}\n")
-    # Solo in locale: non esposto alla rete.
-    app.run(host="127.0.0.1", port=port, debug=False)
+    # Solo in locale: non esposto alla rete. Nel container HOST=0.0.0.0, ma
+    # compose.yaml pubblica la porta solo su 127.0.0.1 del Mac.
+    app.run(host=os.environ.get("HOST", "127.0.0.1"), port=port, debug=False)

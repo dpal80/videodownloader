@@ -193,6 +193,7 @@
   if (!window.matchMedia("(prefers-reduced-motion: reduce)").matches) startRotation();
   let formats = [];
   let allResolutions = [];
+  let canOpenFolder = true;
   let availableHeights = null;
 
   const resLabel = (r) => ({ best: "Migliore disponibile", 2160: "2160p (4K)", 1440: "1440p (2K)" }[r] || r + "p");
@@ -251,6 +252,7 @@
     formats.forEach((f) => $("format").add(new Option(f.label, f.value)));
     fillResolutions();
     $("dir").textContent = "I file vengono salvati in: " + opts.download_dir;
+    canOpenFolder = opts.can_open_folder !== false;
   }
 
   $("format").addEventListener("change", fillResolutions);
@@ -306,7 +308,7 @@
       if (j.status === "completato") {
         $("status").textContent = "✅ Download completato!";
         $("details").textContent = j.filename || "";
-        $("open").style.display = "inline-block";
+        if (canOpenFolder) $("open").style.display = "inline-block";
         $("download").disabled = false;
         return;
       }

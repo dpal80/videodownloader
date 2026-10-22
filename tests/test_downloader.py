@@ -131,3 +131,11 @@ def test_unique_path(tmp_path):
 
 def test_progress_unknown_job(client):
     assert client.get("/api/progress/nope").status_code == 404
+
+
+def test_open_folder_disabled_in_container(client, monkeypatch):
+    import app as app_module
+
+    monkeypatch.setattr(app_module, "CAN_OPEN_FOLDER", False)
+    data = client.post("/api/open-folder", json={}).get_json()
+    assert data["ok"] is False
